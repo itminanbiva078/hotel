@@ -25,6 +25,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Backend'], function () {
         Route::post('/account-setup-chartOfAccount-update/{id}', 'ChartOfAccountController@update')->name('accountSetup.chartOfAccount.update');
         Route::get('/account-setup-chartOfAccount-delete/{id}', 'ChartOfAccountController@destroy')->name('accountSetup.chartOfAccount.destroy');
         Route::get('/account-setup-chartOfAccount-status/{id}/{status}', 'ChartOfAccountController@statusUpdate')->name('accountSetup.chartOfAccount.status');
+        Route::get('/account-setup-chartOfAccount-balance', 'ChartOfAccountController@getAccountBalance')->name('accountSetup.chartOfAccount.getAccountBalance');
+        Route::get('/account-setup-chartOfAccount-bank-balance', 'ChartOfAccountController@getAccountBankBalance')->name('accountSetup.chartOfAccount.getAccountBankBalance');
+
         //accounts Unit crud operation end
 
         //bank  crud operation start

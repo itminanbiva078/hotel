@@ -85,8 +85,8 @@ class UserRepositories
         }
         $columns = Helper::getTableProperty();
         foreach($users as $key => $eachUser){
-            $eachUser->role_id = $eachUser->userRole->name;
-            $eachUser->company_id = $eachUser->company->name;
+            $eachUser->role_id = $eachUser->userRole->name ?? '';
+            $eachUser->company_id = $eachUser->company->name ?? '';
         }
         $data = array();
         if ($users) {

@@ -52,7 +52,7 @@ class PosController extends Controller
      */
     public function index(Request $request)
     {
-        $title = 'Pos';
+        $title = 'Point of Sale (POS)';
         $datatableRoute = 'pos.pos.dataProcessingPos';
         return view('backend.pages.pos.pos.index', get_defined_vars());
     }
@@ -73,8 +73,6 @@ class PosController extends Controller
         $products = $this->productService->getActiveProduct();
         $categorys = $products->pluck('category')->unique();
        
-
-
         $invoiceId = helper::generateInvoiceId('POS','pos',8);
         return view('backend.pages.pos.pos.create', get_defined_vars());
     }
@@ -141,7 +139,7 @@ class PosController extends Controller
             return redirect()->back();
         }
 
-        $title = 'Sales Details';
+        $title = 'Point of Sale (POS)';
         $companyInfo =   helper::companyInfo();
         $activeColumn = Helper::getQueryProperty('salesTransaction.sales.details.create');
         $formInput =  helper::getFormInputByRoute();

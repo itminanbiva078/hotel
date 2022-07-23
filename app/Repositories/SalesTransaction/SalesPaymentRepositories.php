@@ -214,14 +214,14 @@ class SalesPaymentRepositories
             $voucherList = $request->sale_voucher_id;
             $collection_type = $request->collection_type;
 
-
             if($collection_type == 'General Sale'): 
 
                 foreach($voucherList as $key => $eachVoucher): 
                
                     if(!empty($request->credit[$key])): 
                         $request->paid_amount = $request->credit[$key];
-                        if($request->payment_type == "Cash"): 
+                        if($request->payment_type == "Cash"):
+                            $request->request->add(['account_id' =>7]); 
                             $moneyReceitId =   $this->salesRepositories->salesCreditPayment($eachVoucher,$request->paid_amount,$request->payment_type,null,5);
                             //sales payment journal
                             Journal::salePaymentJournal($eachVoucher,$request->credit[$key],$request->account_id,$request->date,5);
@@ -233,12 +233,11 @@ class SalesPaymentRepositories
 
             elseif($collection_type == 'Pos Sale'): 
 
-              
-
                 foreach($voucherList as $key => $eachVoucher): 
                     if(!empty($request->credit[$key])): 
                         $request->paid_amount = $request->credit[$key];
                         if($request->payment_type == "Cash"): 
+                            $request->request->add(['account_id' =>7]);
                             $moneyReceitId =   $this->salesRepositories->salesCreditPayment($eachVoucher,$request->paid_amount,$request->payment_type,null,17);
                             //sales payment journal
                             Journal::salePaymentJournal($eachVoucher,$request->credit[$key],$request->account_id,$request->date,17);
@@ -257,6 +256,7 @@ class SalesPaymentRepositories
                     $request->paid_amount = $request->credit[$key];
                
                     if($request->payment_type == "Cash"): 
+                        $request->request->add(['account_id' =>7]);
                         $moneyReceitId =   $this->salesRepositories->salesCreditPayment($eachVoucher,$request->paid_amount,$request->payment_type,null,18);
                         //sales payment journal
                         Journal::salePaymentJournal($eachVoucher,$request->credit[$key],$request->account_id,$request->date,18);

@@ -114,11 +114,11 @@ table#show_item tr td {
                     
                                     <tr class="div_payment" style="display: none!important">
                                         <td class="grand_total text-right" colspan="4">Payment:</td>
-                                        <td><input  type="text" id="paid_amount" class="form-control paid_amount"  value="" name="paid_amount" placeholder="0.00"></td>
+                                        <td><input  type="text" id="paid_amount" class="form-control paid_amount payment"  value="" name="paid_amount" placeholder="0.00"></td>
                                     </tr>
                                     <tr class="div_payment" style="display: none!important">
                                         <td class="grand_total text-right" colspan="4">Present Due:</td>
-                                        <td><input  type="text" id="due_amount" class="form-control due_amount" readonly  value="" name="due_amount" placeholder="0.00"></td>
+                                        <td><input  type="text" id="due_amount" class="form-control payment" readonly   name="due_amount" placeholder="0.00"></td>
                                     </tr>
 
                             </tbody>
@@ -192,74 +192,79 @@ table#show_item tr td {
 @section('scripts')
 
 <script>
-    $(document).on('click', '.searchFreeRoom', function() {
-           
-            var reservation = $('#reservation').val();
-            var adult = $('.adult').val();
-            var children = $('.children').val();
-            $.ajax({
-                url: "{{route('booking.search.avaialble.room')}}",
-                method: 'GET',
-                data: {
-                    daterange: reservation,
-                    adult: adult,
-                    children: children,
-                },
-                success: function(data) {
-                   
-                   console.log(data.html);
-                    $("#loadSearchResult").html(data.html);
+        $(document).on('click', '.searchFreeRoom', function() {
+            
+                var reservation = $('#reservation').val();
+                var adult = $('.adult').val();
+                var children = $('.children').val();
+                $.ajax({
+                    url: "{{route('booking.search.avaialble.room')}}",
+                    method: 'GET',
+                    data: {
+                        daterange: reservation,
+                        adult: adult,
+                        children: children,
+                    },
+                    success: function(data) {
                     
-                }
-        });  
-    });
-
-function bookNow(room_id,room_name,room_price){
-
-           $("#bookDaterange").val('');
-           $("#bookAdult").val('');
-           $("#bookChildren").val('');
-           $('#bookingForm').show();
-           $('#reBookNow').show();
-           $('#filterForm').hide();
-           $(".bookDaterange").val($('#reservation').val());
-           $(".bookAdult").val($('.adult').val());
-           $(".bookChildren").val($('.children').val());
-           $(".room_id").val(room_id);
-           $(".room_name").val(room_name);
-           $(".room_price").val(room_price);
-           $(".subTotal").val(room_price);
-           $('.discount').trigger('keyup');
-
-}
- 
-$('tbody,tfoot').delegate( 'input.subTotal,input.discount,input.payment', 'keyup', function() {
-            calculation()
+                    console.log(data.html);
+                        $("#loadSearchResult").html(data.html);
+                        
+                    }
+            });  
         });
 
+        function bookNow(room_id,room_name,room_price){
 
+                $("#bookDaterange").val('');
+                $("#bookAdult").val('');
+                $("#bookChildren").val('');
+                $('#bookingForm').show();
+                $('#reBookNow').show();
+                $('#filterForm').hide();
+                $(".bookDaterange").val($('#reservation').val());
+                $(".bookAdult").val($('.adult').val());
+                $(".bookChildren").val($('.children').val());
+                $(".room_id").val(room_id);
+                $(".room_name").val(room_name);
+                $(".room_price").val(room_price);
+                $(".subTotal").val(room_price);
+                $('.discount').trigger('keyup');
 
-function calculation() {
-       
-        var subTotal = parseFloat($('.subTotal').val() - 0);
-        var discount = parseFloat($('.discount').val() - 0);
-        var payment = parseFloat($('.paid_amount').val() - 0);
-        var grandTotal = (subTotal - discount);
-        $('.subTotal').val(subTotal);
-        $('.grand_total').val(grandTotal);
-        $('#grand_total').val(grandTotal);
-        $('#due_amount').val(grandTotal-payment);
+        }
+    
+        $('tbody,tfoot').delegate( 'input.subTotal,input.discount,input.payment', 'keyup', function() {
+                    calculation()
+        });
 
+        $(document).on('keyup', '.payment', function() {
+            let paymentNow = parseFloat($(this).val()-0);
+            var grandTotal =  parseFloat($('#grand_total').val()-0);
+            var presentDue = grandTotal - paymentNow;
+            $("#due_amount").val(presentDue);
 
-    }
-   
-    $(document).on('click', '#reBookNow', function() {
+        });
 
-           $('#bookingForm').hide();
-           $('#filterForm').show();
-           $('#reBookNow').hide();
-           
-    });
+        function calculation() {
+            
+            var subTotal = parseFloat($('.subTotal').val() - 0);
+            var discount = parseFloat($('.discount').val() - 0);
+            var payment = parseFloat($('.paid_amount').val() - 0);
+            var grandTotal = (subTotal - discount);
+            $('.subTotal').val(subTotal);
+            $('.grand_total').val(grandTotal);
+            $('#grand_total').val(grandTotal);
+            // $('#due_amount').val(grandTotal-payment);
+
+        }
+
+        $(document).on('click', '#reBookNow', function() {
+
+            $('#bookingForm').hide();
+            $('#filterForm').show();
+            $('#reBookNow').hide();
+            
+        });
 
 </script>
 @endsection

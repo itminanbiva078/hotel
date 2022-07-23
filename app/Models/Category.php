@@ -20,6 +20,8 @@ class Category extends Model
      return $this->hasMany(Product::class, 'category_id','id');
     }
 
+
+    
     public function scopeCompany($query)
     {
         return $query->where('company_id', Helper::companyId());

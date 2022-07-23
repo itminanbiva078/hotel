@@ -35,13 +35,9 @@ function loadModal(route,idName,title,errors=null,input=null){
 
        });
    }
-
-  
 }
 
 function loadModalView(route,id,title){
-
-  
        $.ajax({
            "url": route,
            "dataType": "json",
@@ -63,7 +59,7 @@ function loadModalView(route,id,title){
 
 
 function loadVoucher(title,image){
-    var html = '<img src="/'+image+'" class="img-thumbnail" alt="title"/>';
+    var html = '<img src="'+image+'" class="img-thumbnail" alt="title"/>';
     $('.modal-title').text('Voucher Documents of '+title);
     $("#loadModalResult").html(html);
 }

@@ -180,7 +180,7 @@ class PurchasesRepositories
     {
         $result = Purchases::select("*")->with([
             'purchasesDetails' => function ($q) {
-                $q->select('id', 'purchases_id', 'branch_id',  'date', 'pack_size', 'approved_quantity','pack_no', 'discount', 'quantity', 'unit_price', 'total_price', 'company_id', 'product_id');
+                $q->select('id', 'purchases_id', 'branch_id',  'date', 'pack_size', 'approved_quantity','pack_no', 'discount', 'quantity', 'unit_price','total_price', 'company_id', 'product_id');
             }, 'purchasesDetails.product' => function ($q) {
                 $q->select('id', 'code', 'name', 'category_id', 'status', 'brand_id', 'company_id');
             }, 'general' => function ($q) {
@@ -214,6 +214,7 @@ class PurchasesRepositories
     
     public function store($request)
     {
+        
         DB::beginTransaction();
         try {
             $poMaster =  new $this->purchases();
@@ -339,11 +340,9 @@ class PurchasesRepositories
 
     public function accountApproved($purchases_id,$request){
        
-
         DB::beginTransaction();
         try {
 
-            
             $date=helper::mysql_date($request->date_picker);
             $status=$request->status;
             $poMaster = Purchases::where("id",$purchases_id)->company()->first();
@@ -546,7 +545,7 @@ class PurchasesRepositories
                 $stockSummary = $stockSummaryExits;
                 $stockSummary->quantity = $stockSummary->quantity + $value->quantity;
             }
-            $stockSummary->company_id = $value->company_id;
+            $stockSummary->company_id = helper::companyId();
             $stockSummary->branch_id = $value->branch_id ?? helper::getDefaultBranch();
             $stockSummary->store_id = $value->store_id ?? helper::getDefaultStore();
             $stockSummary->category_id = helper::getRow('products','id',$value->product_id,'category_id');

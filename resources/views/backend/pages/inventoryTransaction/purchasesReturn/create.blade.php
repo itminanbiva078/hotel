@@ -92,7 +92,7 @@ table#show_item tr td {
             </div>
             <!-- /.card-body -->
             <div class="card-footer">
-                <form class="needs-validation" method="POST"  action="{{ route('inventoryTransaction.purchasesReturn.store') }}" novalidate>
+                <form class="needs-validation" method="POST" enctype="multipart/form-data" onsubmit="return ValidationEvent()" action="{{ route('inventoryTransaction.purchasesReturn.store') }}" novalidate>
 
                     @csrf
                 <div class="row">
@@ -108,7 +108,6 @@ table#show_item tr td {
 </div>
 
 @endsection
-
 @section('scripts')
 
 <script type="text/javascript">

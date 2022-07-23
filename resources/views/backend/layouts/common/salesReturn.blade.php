@@ -54,7 +54,7 @@
          <thead class="bg-default">
             <tr>
                <th width="15%">Product</th>
-               @if(in_array('batch_no',$activeColumn))
+               {{-- @if(in_array('batch_no',$activeColumn))
                <th>Batch Number</th>
                @endif 
                @if(in_array('pack_size',$activeColumn))
@@ -62,7 +62,7 @@
                @endif 
                @if(in_array('pack_no',$activeColumn))
                <th class="text-right">Pack No.</th>
-               @endif
+               @endif --}}
                <th class="text-right">Quantity</th>
                <th class="text-right">Remaining Quantity</th>
                <th class="text-right">Return Quantity</th>
@@ -78,14 +78,12 @@
             $rqty = 0;
             @endphp
          <tbody>
-            @foreach($salesList->salesDetails as $key => $eachProduct)
-
-
-              @php 
-              // dd($salesList);
             
-            
-            $tpsize += $eachProduct->pack_size;
+            @if($request->saleType == 2) 
+               @foreach($salesList->salesDetails as $key => $eachProduct)
+             @php 
+              // dd($salesList)
+                  $tpsize += $eachProduct->pack_size;
                  $tpno += $eachProduct->pack_no;
                  $tqty += $eachProduct->quantity;
                  $rqty += $eachProduct->quantity - $eachProduct->return_quantity;
@@ -96,7 +94,7 @@
                <td> {{$eachProduct->product->name}}</td>
                @endif
 
-               @if(in_array('batch_no',$activeColumn))
+               {{-- @if(in_array('batch_no',$activeColumn))
                <td nowrap> {{$eachProduct->batch_no}}</td>
                @endif
 
@@ -105,7 +103,7 @@
                @endif
                @if(in_array('pack_no',$activeColumn))
                <td class="text-right"> {{$eachProduct->pack_no}}</td>
-               @endif
+               @endif --}}
                @if(in_array('quantity',$activeColumn))
                <td class="text-right"> <input type="number" required=""  name="quantity[]" class="form-control quantity decimal" id="" placeholder="Quantity" value="{{$eachProduct->quantity}}" readonly="readonly"></td>
                @endif
@@ -124,22 +122,68 @@
                @endif
             </tr>
             @endforeach
+            @else
+            @foreach($salesList->posDetails as $key => $eachProduct)
+      
+          @php 
+           // dd($salesList)
+         $tpsize += $eachProduct->pack_size;
+              $tpno += $eachProduct->pack_no;
+              $tqty += $eachProduct->quantity;
+              $rqty += $eachProduct->quantity - $eachProduct->return_quantity;
+           @endphp
+
+         <tr class="new_item{{$key}}">
+           @if(in_array('product_id',$activeColumn))
+            <td> {{$eachProduct->product->name}}</td>
+            @endif
+
+            {{-- @if(in_array('batch_no',$activeColumn))
+            <td nowrap> {{$eachProduct->batch_no}}</td>
+            @endif
+
+            @if(in_array('pack_size',$activeColumn))
+            <td class="text-right"> {{$eachProduct->pack_size}}</td>
+            @endif
+            @if(in_array('pack_no',$activeColumn))
+            <td class="text-right"> {{$eachProduct->pack_no}}</td>
+            @endif --}}
+            @if(in_array('quantity',$activeColumn))
+            <td class="text-right"> <input type="number" required=""  name="quantity[]" class="form-control quantity decimal" id="" placeholder="Quantity" value="{{$eachProduct->quantity}}" readonly="readonly"></td>
+            @endif
+            <td> <input type="number" required=""  name="remaining_quantity[]" class="form-control remaining_quantity decimal" id="" placeholder="Quantity" value="{{$eachProduct->quantity - $eachProduct->return_quantity}}" readonly="readonly"></td>
+            <td> <input type="number" required=""  name="return_quantity[]" class="form-control return_quantity decimal" id="" placeholder="Return Quantity" value="" ></td>
+           
+            @if(in_array('unit_price',$activeColumn))
+            <td> <input type="number" required=""  name="unit_price[]" class="form-control unit_price decimal" id="" readonly="readonly" placeholder="Unit Price" value="{{$eachProduct->unit_price}}"></td>
+            @endif
+            <td> 
+               <input type="hidden" required=""  name="deduction_percen_amount[]" class="form-control deduction_percen_amount decimal" id="deduction_percen_amount"   placeholder="" value="">
+               <input type="number" required=""  name="deduction[]" class="form-control deduction decimal" id=""   placeholder="Deduction : 5% " value=""></td>
+               <input type="hidden" required=""  name="product_id[]" class="form-control product_id decimal" id=""   placeholder="" value="{{$eachProduct->product_id}}"></td>
+            @if(in_array('total_price',$activeColumn))
+            <td> <input type="number" required=""  name="total_price[]" readonly="" class="form-control total_price decimal" id="" placeholder="Total Price" value=""></td>
+            @endif
+         </tr>
+         @endforeach
+   @endif
+
          </tbody>
 
 
          <tfoot>
             <tr>
-               <td class="text-right table_data_product_id" colspan="2">Sub-Total</td>
+               <td class="text-right table_data_product_id" colspan="1">Sub-Total</td>
                @if(in_array('batch_no',$activeColumn))
                {{-- <td class="text-right table_data_batch_no"><span class="sub_total_batch_no"></span></td> --}}
                @endif
-               @if(in_array('pack_size',$activeColumn))
+               {{-- @if(in_array('pack_size',$activeColumn))
                <td class="text-right table_data_pack_size"><span class="sub_total_pack_size">@php echo number_format($tpsize,2); @endphp</span></td>
                @endif
 
                @if(in_array('pack_no',$activeColumn))
                <td class="text-right pack_no"><span class="sub_total_pack_no">@php echo number_format($tpno,2); @endphp </span></td>
-               @endif
+               @endif --}}
 
                <td class="text-right table_data_quantity"><span class="sub_data_quantity">@php echo number_format($tqty,2); @endphp</span></td>
                <td class="text-right table_data_remaining"><span class="sub_data_remaining">@php echo number_format($rqty,2); @endphp</span></td>
@@ -161,7 +205,7 @@
                <td class="grand_total text-right" colspan="@php helper::getColspan($activeColumn,4);@endphp">Grand Total:</td>
                <td><input  type="text" id="grand_total" readonly="" class="form-control grandTotal" value="" name="grand_total" placeholder="0.00"></td>
             </tr>
-            <tr>
+            <tr class="div_payment" required style="display: none!important">
                <td class="grand_total text-right" colspan="@php helper::getColspan($activeColumn,4);@endphp">Payment:</td>
                <td><input  type="text" id="paid_amount" class="form-control payment" value="" name="paid_amount" placeholder="0.00"></td>
             </tr>
@@ -239,10 +283,28 @@
          $('#grand_total').val((total_price_amount-total_deduction_percentage_amount).toFixed(2));
          $('#paid_amount').val((total_price_amount-total_deduction_percentage_amount).toFixed(2));
    }
+
+   $(document).on('change', '.payment_type', function() {
+    let payment_type = $(this).val();
+
+    if(payment_type == 'Cash'){
+      
+        $('.div_payment').show();
+     
+    }else if(payment_type == 'Credit'){
+      
+        $('.div_payment').hide();
+    }else{
+      
+        $('.div_payment').show();
+    }
+
+});
+
 $(document).on('change', '.payment_type', function() {
    let payment_type = $(this).val();
    if(payment_type == 'Cash'){
-       $('.div_account_id').removeClass("hide");
+      //  $('.div_account_id').removeClass("hide");
        $('.div_bank_id').addClass('hide');
    }else if(payment_type == 'Credit'){
        $('.div_account_id').addClass("hide");

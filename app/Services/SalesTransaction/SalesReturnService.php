@@ -85,6 +85,16 @@ class SalesReturnService
 
         return $this->systemRepositories->details($id);
     }
+
+    /**
+     * @param $request
+     * @return \App\Models\Sales
+     */
+    public function posDetails($id)
+    {
+
+        return $this->systemRepositories->posDetails($id);
+    }
     /**
      * @param $request
      * @return \App\Models\Sales

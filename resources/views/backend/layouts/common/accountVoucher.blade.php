@@ -33,7 +33,7 @@
                     </td>
                 @endif
                 @if(in_array('debit',$activeColumn))
-                 <td><input type="number" name="debit[]"  class="form-control debit decimal border-success border" id="" placeholder="0.00" value="{{ $value->debit}}"></td>
+                 <td><input type="number" name="debit[]"  class="form-control debit debitAmount decimal border-success border" id="" placeholder="0.00" value="{{ $value->debit}}"></td>
                 @endif
                 @if(in_array('credit',$activeColumn))
                  <td><input type="number" name="credit[]"  class="form-control credit decimal border-success border" id="" placeholder="0.00" value="{{ $value->credit}}"></td>
@@ -206,9 +206,7 @@
   
     $(document).on('change', '.payment_type', function() {
         let payment_type = $(this).val();
-  
-        alert(payment_type);
-        if (payment_type == 1) {
+          if (payment_type == 1) {
             $('.div_customer_id').removeClass("hide");
             $('.div_supplier_id').addClass('hide');
             $('.div_miscellaneous').addClass('hide');
@@ -228,6 +226,29 @@
     $('.credit_id').change(function() {
     var credit_id  = $(this).val();
     $('.debit_id  option[value="'+credit_id  +'"]').prop('disabled', true);
+});
+
+
+$(document).on('keyup', '.debitAmount', function() {
+
+var thisPayment = 0;
+$('.debitAmount').each(function(i, e) {
+    var total_price = parseFloat($(this).val() - 0);
+    thisPayment += total_price;
+});
+
+var accountBalance = parseFloat($(".accountBalance").val()-0);
+if(accountBalance < thisPayment){
+      Swal.fire('Warning!', 'Payment should be less than account balance.', 'warning' );
+      $(this).val(grandTotal);
+      $(this).val(0);
+      $(this).removeClass("bg-danger border-success");
+      $(this).removeClass("border border-success");
+      $(this).addClass("border border-danger");
+  }else{
+      $(this).removeClass("bg-danger border-success");
+      $(this).addClass("bg-primary border-success text-black");
+  }
 });
 
 </script>

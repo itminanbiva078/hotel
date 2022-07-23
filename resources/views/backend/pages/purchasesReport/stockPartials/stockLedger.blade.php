@@ -46,10 +46,13 @@
         @php 
         $oqty+=$report->sopQty;
         $oprice+=$report->sopQty*$report->sopUnitPrice;
+
         $iqty+=$report->stockIn;
         $iprice+=$report->stockIn*$report->sinUnitPrice;
+
         $sqty+=$report->stockOut;
         $sprice+=$report->stockOut*$report->soutUnitPrice;
+
         $cqty+=$report->currentStock;
         $cprice+=$report->currentStock*$report->avgPrice;
        @endphp
@@ -68,9 +71,9 @@
             <td    class="text-right color3">{{helper::pricePrint($report->stockIn*$report->sinUnitPrice)}}</td>
 
             <td    class="text-right color2">{{helper::pricePrint($report->stockOut)}}</td>
-            <td    class="text-right color2">{{helper::pricePrint($report->soutUnitPrice)}}</td>
-            <td    class="text-right color2">{{helper::pricePrint($report->stockOut*$report->soutUnitPrice)}}</td>
-
+            <td    class="text-right color2">{{helper::pricePrint($report->sinUnitPrice)}}</td>
+            <td    class="text-right color2">{{helper::pricePrint($report->stockOut*$report->sinUnitPrice)}}</td>
+            
             <td    class="text-right color1">{{helper::pricePrint($report->currentStock)}}</td>
             <td    class="text-right color1">{{helper::pricePrint($report->avgPrice)}}</td>
             <td    class="text-right color1">{{helper::pricePrint($report->currentStock*$report->avgPrice)}}</td>

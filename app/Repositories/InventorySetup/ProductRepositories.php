@@ -190,6 +190,7 @@ class ProductRepositories
                    $product->pname=$product->product->name;
                    $product->sprice=$product->product->sale_price;
                    $product->puprice=$product->product->purchases_price;
+                  
                 endif;
 
                 if($product->batch->name):
@@ -204,10 +205,12 @@ class ProductRepositories
                    $result->pname=$result->product->name;
                    $result->sprice=$result->product->sale_price;
                    $result->puprice=$result->product->purchases_price;
+                 
                 endif;
                 if($result->batch->name):
                   $result->bname=$result->batch->name . ' - Stock - ' .$result->quantity;
                 endif;
+
                 return  $result;
         endif;
        return $result;
@@ -239,6 +242,7 @@ class ProductRepositories
         $result = $this->product::with('productDetails')->where('type_id','POS Product')->where('status', 'Approved')->company()->get();
         return $result;
     }
+
     public function implodeProduct(){
         DB::beginTransaction();
         try {
@@ -308,19 +312,20 @@ class ProductRepositories
     }
     public function store($request)
     {
+
+
         DB::beginTransaction();
         try
         {
             $product = new $this->product();
             $product->code = $this->productCode();
-            $product->code = $request->code;
+            // $product->code = $request->code;
             $product->name = $request->name;
             $product->category_id = $request->category_id;
             $product->brand_id = $request->brand_id;
             $product->description = $request->description;
             $product->unit_id = $request->unit_id;
             $product->type_id = $request->type_id;
-            $product->floor_id = $request->floor_id ?? 0;
             $product->purchases_price = $request->purchases_price;
             $product->sale_price = $request->sale_price;
             $product->low_stock = $request->low_stock;
@@ -353,7 +358,7 @@ class ProductRepositories
         }
         catch (\Exception $e)
         {
-            dd($e->getMessage());
+            // dd($e->getMessage());
             DB::rollback();
             return $e->getMessage();
         }
@@ -362,23 +367,18 @@ class ProductRepositories
     public function masterDetails($masterId, $request)
     {
 
-
-
         $productDetails = ProductDetails::where('product_id', $masterId)->first();
-
         if(empty($productDetails)){
-
-
             $productDetails = new ProductDetails;
         }
-
         $productDetails->product_id = $masterId;
         $productDetails->number_of_bed  = $request->number_of_bed ?? '';
         $productDetails->number_of_room  = $request->number_of_room ?? '';
         $productDetails->advance_percentage  = $request->advance_percentage ?? '';
         $productDetails->room_no  = $request->room_no ?? '';
         $productDetails->floor_id  = $request->floor_id ?? '';
-        $productDetails->product_attributes  = implode(",",$request->product_attributes) ?? '';
+        if (!empty($request->product_attributes))
+        $productDetails->product_attributes  = implode(",", $request->product_attributes);
         $productDetails->save();
         return $productDetails;
     }
@@ -431,7 +431,6 @@ class ProductRepositories
             $product->description = $request->description;
             $product->unit_id = $request->unit_id;
             $product->type_id = $request->type_id;
-            $product->floor_id = $request->floor_id ?? 0;
             $product->purchases_price = $request->purchases_price;
             $product->sale_price = $request->sale_price;
             $product->low_stock = $request->low_stock;

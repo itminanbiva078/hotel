@@ -43,6 +43,9 @@
         @if(!empty($details->date))
         <b>Date:</b> {{ helper::get_php_date($details->date)}}<br>
         @endif
+        @if(!empty($details->adjustment_type))
+        <b>Adjustment Type:</b> {{ $details->adjustment_type}}<br>
+        @endif
         @if(!empty($details->payment_type))
         <b>Payment Type:</b> {{$details->payment_type}}<br>
         @endif

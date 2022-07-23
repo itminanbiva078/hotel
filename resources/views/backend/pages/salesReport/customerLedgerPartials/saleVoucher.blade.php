@@ -14,6 +14,7 @@
             <th class="text-right">Grand Total</th>
         </tr>
     </thead>
+
     <tbody>
         @php 
         $topening=0;
@@ -21,26 +22,31 @@
         $tdiscount=0;
         $tbalance=0;
         $tgrand_total=0;
+        $transaction=0;
         @endphp
-        @foreach($reports as $key => $report)
-            @php 
-            $topening+=$report->opening;
-            $tsub_total+=$report->subtotal;
-            $tdiscount+=$report->discount;
-            $tgrand_total+=$report->grand_total;
-          
-            @endphp
-            <tr>
-                <td>{{$key+1}}</td>
-                <td>{{$report->customer->name}} [{{$report->customer->code}}]</td>
-                <td>{{$report->customer->address}}</td>
-                <td>{{$report->customer->phone}}</td>
-                <td class="text-right">{{helper::pricePrint($report->opening)}}</td>
-                <td class="text-right">{{helper::pricePrint($report->subtotal)}}</td>
-                <td class="text-right">{{helper::pricePrint($report->discount)}}</td>
-                <td class="text-right">{{helper::pricePrint($report->grand_total)}}</td>
-            </tr>
-        @endforeach
+        @if(!empty($reports))
+            @foreach($reports as $key => $report)
+                @php 
+                $topening+=$report->opening ?? 0;
+                $tsub_total+=$report->subtotal;
+                $tdiscount+=$report->discount;
+                $tgrand_total+=$report->grand_total;
+                $transaction=$report->grand_total+$report->opening;
+                @endphp
+                 @if(!empty($transaction))
+                <tr>
+                    <td>{{$key+1}}</td>
+                    <td>{{$report->customer->name}} [{{$report->customer->code}}]</td>
+                    <td>{{$report->customer->address ?? 0}}</td>
+                    <td>{{$report->customer->phone ?? 0}}</td>
+                    <td class="text-right">{{helper::pricePrint($report->opening ?? 0)}}</td>
+                    <td class="text-right">{{helper::pricePrint($report->subtotal)}}</td>
+                    <td class="text-right">{{helper::pricePrint($report->discount)}}</td>
+                    <td class="text-right">{{helper::pricePrint($report->grand_total)}}</td>
+                </tr>
+                @endif
+            @endforeach
+        @endif
     </tbody>
     <tfoot>
         <tr>

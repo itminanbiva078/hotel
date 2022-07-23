@@ -56,8 +56,6 @@ class StockReportRepositories
         ->company()
         ->havingRaw('quantity > 1');
 
-
-
         if($store_id !='All'):
             $query->when($store_id, function ($q) use($store_id) {
                 return $q->where('store_id', $store_id);
@@ -244,10 +242,10 @@ class StockReportRepositories
         savg.unitPrice as avgPrice,
         c.name as categoryName,
         b.name as brandName,
-        (ifnull(sin.totalQty,0)+ifnull(sop.totalQty,0)+ifnull(tin.totalQty,0)+ifnull(rin.totalQty,0))-(ifnull(sout.totalQty,0)+ifnull(tout.totalQty,0)+ifnull(rout.totalQty,0)) as currentStock,
-        (ifnull(sin.totalQty,0)+ifnull(sop.totalQty,0)+ifnull(tin.totalQty,0)+ifnull(rin.totalQty,0))+(ifnull(sout.totalQty,0)+ifnull(tout.totalQty,0)+ifnull(rout.totalQty,0)) as transactionStock,
-        (ifnull(sin.totalQty,0)+ifnull(tin.totalQty,0)+ifnull(rin.totalQty,0)) as stockIn,
-        (ifnull(sout.totalQty,0)+ifnull(tout.totalQty,0)+ifnull(rout.totalQty,0)) as stockOut
+        (ifnull(sin.totalQty,0)+ifnull(sop.totalQty,0)+ifnull(tin.totalQty,0)+ifnull(rin.totalQty,0)+ifnull(adin.totalQty,0))-(ifnull(sout.totalQty,0)+ifnull(tout.totalQty,0)+ifnull(rout.totalQty,0)+ifnull(adout.totalQty,0)) as currentStock,
+        (ifnull(sin.totalQty,0)+ifnull(sop.totalQty,0)+ifnull(tin.totalQty,0)+ifnull(rin.totalQty,0)+ifnull(adin.totalQty,0))+(ifnull(sout.totalQty,0)+ifnull(tout.totalQty,0)+ifnull(rout.totalQty,0)+ifnull(adout.totalQty,0)) as transactionStock,
+        (ifnull(sin.totalQty,0)+ifnull(tin.totalQty,0)+ifnull(rin.totalQty,0)+ifnull(adin.totalQty,0)) as stockIn,
+        (ifnull(sout.totalQty,0)+ifnull(tout.totalQty,0)+ifnull(rout.totalQty,0)++ifnull(adout.totalQty,0)) as stockOut
 
         FROM products as p
          /*get opening stock start*/
@@ -261,6 +259,18 @@ class StockReportRepositories
         where s.type='in'  and s.date >= '$from_date' and s.date <='$to_date' $scondSql
         GROUP BY s.product_id) as sin ON sin.product_id=p.id
          /*get stock in end*/
+
+         /*get adjustment stock in start*/
+        left JOIN(SELECT sum(s.quantity) as totalQty,sum(s.total_price) as totalPrice,(sum(s.total_price)/sum(s.quantity)) as unitPrice,s.product_id,s.branch_id FROM stocks as s 
+        where s.type='adin'  and s.date >= '$from_date' and s.date <='$to_date' $scondSql
+        GROUP BY s.product_id) as adin ON adin.product_id=p.id
+         /*get adjustment stock in end*/
+
+          /*get adjustment stock out start*/
+        left JOIN(SELECT sum(s.quantity) as totalQty,sum(s.total_price) as totalPrice,(sum(s.total_price)/sum(s.quantity)) as unitPrice,s.product_id,s.branch_id FROM stocks as s
+        where s.type='adout' and s.date >= '$from_date' and s.date <='$to_date' $scondSql
+        GROUP BY s.product_id) as adout ON adout.product_id=p.id
+       /*get adjustment stock out end*/
 
           /*get stock out start*/
         left JOIN(SELECT sum(s.quantity) as totalQty,sum(s.total_price) as totalPrice,(sum(s.total_price)/sum(s.quantity)) as unitPrice,s.product_id,s.branch_id FROM stocks as s
@@ -334,22 +344,17 @@ class StockReportRepositories
             $wsql+=1;
         }
 
-
-
         $pcchsql='';
         if(!empty($category_id) && $category_id != "All"){
             $pcchsql='and p.category_id='.$category_id.' ';
             $wsql+=1;
         }
 
-
-
         $pchsql='';
         if(!empty($product_id) && $product_id != "All"){
             $pchsql='and s.product_id='.$product_id.' ';
             $wsql+=1;
         }
-
         $bchsql='';
         if(!empty($branch_id) && $branch_id != "All"){
             $bchsql='and s.branch_id='.$branch_id.' ';

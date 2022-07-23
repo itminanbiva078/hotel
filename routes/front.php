@@ -25,7 +25,7 @@ Route::get('/company_management', 'FrontendController@company_management')->name
 Route::get('/statement', 'FrontendController@statement')->name('statement');
 Route::get('/service', 'FrontendController@service')->name('service');
 Route::get('/project', 'FrontendController@project')->name('project');
-Route::any('/rooms', 'FrontendController@rooms')->name('rooms');
+Route::get('/rooms', 'FrontendController@rooms')->name('rooms');
 Route::get('/contact', 'FrontendController@contact')->name('contact');
 Route::get('/search_room', 'FrontendController@search_room')->name('search_room');
 Route::get('/search_filter', 'FrontendController@search_filter')->name('search_filter');
@@ -52,7 +52,6 @@ Route::get('/booking-transaction-booking-list', 'BookingController@index')->name
 Route::get('/dataProcessingBooking', 'BookingController@dataProcessingBooking')->name('bookingTransaction.booking.dataProcessingBooking');
 Route::get('/booking-transaction-booking-status/{id}/{status}', 'BookingController@statusUpdate')->name('bookingTransaction.booking.status');
 Route::get('/booking-transaction-booking-payment-status/{id}/{status}', 'BookingController@statusUpdate')->name('bookingTransaction.booking.payment.status');
-
 /**/
 
 /** Amarpay payment gateway Integrate start */

@@ -93,6 +93,7 @@ Purchases ReturnTransaction - {{$title}}
                         </tr>
                     </thead>
                     <tbody>
+
                         @php 
                           $tqty = 0;
                           $tprice = 0;
@@ -100,7 +101,7 @@ Purchases ReturnTransaction - {{$title}}
                         @foreach($details->preturnDetails as $key => $eachDetails)
                         @php 
                             $tqty+=$eachDetails->quantity;
-                            $tprice+=$eachDetails->quantity*$eachDetails->total_price;
+                            $tprice+=$eachDetails->quantity*$eachDetails->unit_price;
                           @endphp
                             <tr>
                                 <td>{{$key+1}}</td>

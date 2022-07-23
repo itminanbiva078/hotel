@@ -79,7 +79,8 @@ class SalesReturnController extends Controller
      */
     public function salesListAutocomplete(Request $request)
     {
-        $salesList = $this->systemService->salesList($request->search);
+        $salesList = $this->systemService->salesList($request);
+        //dd($salesList);
         return json_encode($this->systemTransformer->getList($salesList));
 
     }
@@ -92,8 +93,12 @@ class SalesReturnController extends Controller
     public function salesDetails(Request $request)
     {
         $formInput =  helper::getFormInputByRoute('salesTransaction.sales.create');
-        $salesList = $this->systemService->details($request->sale_id);
-
+        if($request->saleType == 2): 
+            $salesList = $this->systemService->details($request->sale_id);
+        else: 
+            $salesList = $this->systemService->posDetails($request->sale_id);
+        endif;
+       
         $activeColumn = Helper::getQueryProperty('salesTransaction.sales.details.create');
         $returnHtml = view('backend.layouts.common.salesReturn', get_defined_vars())->render();
         return response()->json(array('success' => true, 'html' => $returnHtml));

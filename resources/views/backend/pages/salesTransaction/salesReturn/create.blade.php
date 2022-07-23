@@ -37,20 +37,6 @@ table#show_item tr td {
 
 @section('admin-content')
 
-<div class="row">
-    <div class="col-md-12">
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-
-    </div>
     <div class="col-md-12">
         <div class="card card-default">
             <div class="card-header">
@@ -72,13 +58,16 @@ table#show_item tr td {
                 </div>
             </div>
             <!-- /.card-header -->
-            <div class="card-body">
-
+            <div class="card-body sale-return-create">
                 <form class="needs-validation" method="POST"  action="" novalidate>
                     <div class="row">
-                        <div class="col-md-8 offset-md-2">
-                            <form action="simple-results.html">
-                                <div class="input-group">
+                        <div class="d-flex gap-20 align-items-center col-md-8 offset-md-2">
+                            <form class="" action="simple-results.html">
+                                <select name="" id="" class="saleType form-control w-40">
+                                    <option value="1"> Pos sell</option>
+                                    <option value="2">General sell</option>
+                                </select>
+                                <div class="input-group w-100">
                                     <input type="search" id="search" class="form-control form-control-lg" placeholder="Type Invoice ID">
                                     <div class="input-group-append">
                                         <button type="submit" class="btn btn-lg btn-default">
@@ -103,6 +92,7 @@ table#show_item tr td {
                 <div class="row">
                     <br>
                     <div class="loadSalesInvoice"></div>
+                    <input type="hidden" name="salesType" value="" class="salesType">
                     <button class="btn btn-info sbtn" style="display: none!important" disabled type="submit"><i class="fa fa-save"></i> &nbsp;Save</button>
                 </div>
             </form>
@@ -131,7 +121,8 @@ table#show_item tr td {
             dataType: "json",
             data: {
                _token: CSRF_TOKEN,
-               search: request.term
+               search: request.term,
+               salesType: $('.saleType').val(),
             },
             success: function( data ) {
                response(data.data);
@@ -149,10 +140,12 @@ table#show_item tr td {
             dataType: "json",
             data: {
                _token: CSRF_TOKEN,
-               sale_id: ui.item.value
+               sale_id: ui.item.value,
+               saleType: $('.saleType').val(),
             },
             success: function(data) {
               $('.loadSalesInvoice').html(data.html);
+              $('.salesType').val($('.saleType').val());
             }
           });
            return false;

@@ -82,6 +82,7 @@ class PurchasesReport extends Controller
             }
 
         }
+
         $title = 'Supplier Ledger';
         $formInput = helper::getColumnProperty('report_models',array('supplier_id','purhcases_report_type','date_range'));
         return view('backend.pages.purchasesReport.supplierLedger', get_defined_vars());

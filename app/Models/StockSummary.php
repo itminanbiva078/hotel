@@ -28,6 +28,7 @@ class StockSummary extends Model
         return $this->belongsTo(BatchNumber::class,'batch_no','id');
     }
     
+    
     public function store(){
         return $this->belongsTo(Store::class,'store_id','id');
     }

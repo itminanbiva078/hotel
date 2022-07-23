@@ -14,6 +14,16 @@
         @include('backend.layouts.partials.header')
         @include('backend.layouts.partials.sidebar')
         <div class="content-wrapper">
+
+          @if ($errors->any())
+          <div class="alert alert-danger">
+              <ul class="list-unstyled">
+                  @foreach ($errors->all() as $error)
+                  <li>{{ $error }}</li>
+                  @endforeach
+              </ul>
+          </div>
+          @endif
             <!-- Content Header (Page header) -->
             @yield('navbar-content')
             <section class="content">

@@ -67,6 +67,20 @@ class Helper
     }
 
 
+    public static function pImageUrl($image){
+        try
+        {
+           $valid_image = str_replace("public","storage",$image);
+            getimagesize($valid_image);
+            $imageUrl=$valid_image;
+        } catch (\Exception $e)
+        {
+            $imageUrl =   'assets/images/image-not-found.png';
+
+        }
+        return $imageUrl ?? '';
+
+    }
 
     public static function productBatch($batchNo){
 
@@ -310,9 +324,6 @@ class Helper
 
     public static function getAvailableRoom($request)
     {
-
-
-
         $dateRange = explode("-",$request->daterange);
         $from_date = date('Y-m-d',strtotime($dateRange[0]));
         $to_date = date('Y-m-d',strtotime($dateRange[1]));
@@ -320,8 +331,6 @@ class Helper
         $child = $request->children ?? 0;
         $totalPerson = $adult+$child;
         $totalPerson = $totalPerson ?? 1;
-
-
 
         $sql = "select
         p.id
@@ -437,8 +446,6 @@ class Helper
      */
     public static function getCurrentNavigationId($customRoute = null)
     {
-
-       
         if (is_null($customRoute)) {
             $routeChildInfo =  Navigation::where('route', Route::currentRouteName())->first();
          
@@ -895,10 +902,15 @@ class Helper
     return $ltype;
  }
 
-    public static function productAvg($product_id,$batch_id){
+    public static function productAvg($product_id,$batch_id=null){
 
-       $productAvgPrice =  Stock::selectRaw('sum(total_price)/sum(quantity) as avgPrice')->company()->where('product_id',$product_id)->where('batch_no',$batch_id)->first();
+        if(!empty($batch_id)):
+            $productAvgPrice =  Stock::selectRaw('sum(total_price)/sum(quantity) as avgPrice')->company()->where('type','in')->where('product_id',$product_id)->where('batch_no',$batch_id)->first();
+        else:
+            $productAvgPrice =  Stock::selectRaw('sum(total_price)/sum(quantity) as avgPrice')->company()->where('type','in')->where('product_id',$product_id)->first();
+        endif;
         return $productAvgPrice->avgPrice ?? 0;
+
     }
 
     public static function getLedgerHead()
@@ -914,6 +926,21 @@ class Helper
     }
 
    
+    public static function getPaymentLedgerHead()
+    {
+        
+        $parentId=array(2,8);
+        $ledgerParent = ChartOfAccount::select('parent_id')->whereIn('parent_id',$parentId)->where('is_posted', 1)->distinct()->get();
+        $notInValue=array(12,13,14,15,16,3);
+        $ledgerAccount = array();
+        foreach ($ledgerParent as $key => $value) {
+            $index['parent'] = ChartOfAccount::select('name', 'id')->where('id', $value->parent_id)->first();
+            $index['parentChild'] = ChartOfAccount::select('name', 'id')->whereNotIn('id',$notInValue)->where('parent_id', $value->parent_id)->where('is_posted', 1)->get();
+            $ledgerAccount[] = $index;
+        }
+        return $ledgerAccount;
+    }
+    
     public static function priceCalType($price){
        $calculateType = self::geSetupValue('price_calculate_type');
        $afterTypeCal = 0;
@@ -1222,6 +1249,7 @@ class Helper
        $productListCategoryWise =  Category::whereHas('products',function($q) use ($companyId){
         $q->where('company_id',$companyId)->where('type_id','POS Product');
        })->get();
+
        return $productListCategoryWise;
     }
 

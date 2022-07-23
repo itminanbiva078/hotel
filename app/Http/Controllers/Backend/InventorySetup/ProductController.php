@@ -38,12 +38,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-
        // $onlySoftDeleted = Brand::onlyTrashed()->get();
-
-       
-
-
         $title = 'Product Manage | Product - List';
         $explodeRoute = "inventorySetup.product.explode";
         $createRoute = "inventorySetup.product.create";
@@ -51,11 +46,15 @@ class ProductController extends Controller
         $columns = helper::getTableProperty();
         return view('backend.layouts.common.datatable.datatable', get_defined_vars());
     }
+
+    
     public function dataProcessingProduct(Request $request)
     {
         $json_data = $this->systemService->getList($request);
         return json_encode($this->systemTransformer->dataTable($json_data));
     }
+
+
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
@@ -66,6 +65,8 @@ class ProductController extends Controller
         $formInputDetails =  helper::getFormInputByRoute('inventorySetup.productDetails.create');
         return view('backend.pages.inventorySetup.product.create', get_defined_vars());
     }
+
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -78,10 +79,20 @@ class ProductController extends Controller
             session()->flash('error', 'Validation error !!');
             return redirect()->back()->withErrors($e->errors())->withInput();
         }
+
+        try {
+            $this->validate($request,$this->systemService->validateRoomUniqueId($request));
+        } catch (ValidationException $e) {
+            session()->flash('error', 'Validation error !!');
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        }
+
         $this->systemService->store($request);
         session()->flash('success', 'Data successfully save!!');
-        return redirect()->route('inventorySetup.product.index');
+        return redirect()->route('inventorySetup.product.index');    
     }
+
+
     /**
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -143,6 +154,8 @@ class ProductController extends Controller
         }
         return redirect()->route('inventorySetup.product.index');
     }
+
+
      /**
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -171,6 +184,8 @@ class ProductController extends Controller
             return response()->json($this->systemTransformer->getList($details), 200);
         }
     }
+
+
      /**
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -189,6 +204,8 @@ class ProductController extends Controller
         }
         return response()->json($this->systemTransformer->getList($details), 200);
     }
+
+
      /**
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
@@ -202,10 +219,13 @@ class ProductController extends Controller
         return response()->json($this->systemTransformer->getList($details), 200);
     }
 
+
     public function productExplode() 
     {
         return  $this->systemService->exploadProduct();
     } 
+
+
     /**
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View

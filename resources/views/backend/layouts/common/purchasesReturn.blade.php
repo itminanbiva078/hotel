@@ -52,14 +52,15 @@
          <thead class="bg-default">
             <tr>
                <th width="15%">Product</th> 
-               @if(in_array('pack_size',$activeColumn))
+               {{-- @if(in_array('pack_size',$activeColumn))
                <th class="text-right">Pack Size</th>
                @endif 
                @if(in_array('pack_no',$activeColumn))
                <th class="text-right">Pack No.</th>
-               @endif
-               <th class="text-right">Quantity</th>
+               @endif --}}
+               <th class="text-right">Purchases Quantity</th>
                <th class="text-right">Remaining Quantity</th>
+               <th class="text-right">Present Stock</th>
                <th class="text-right">Return Quantity</th>
                <th class="text-right">Unit Price</th>
                <th class="text-right">Deduction %</th>
@@ -71,6 +72,7 @@
             $tpno =0;
             $tqty = 0;
             $rqty = 0;
+            $present_stock =0;
             @endphp
          <tbody>
             @foreach($purchasesList->purchasesDetails as $key => $eachProduct)
@@ -79,22 +81,26 @@
                  $tpno += $eachProduct->pack_no;
                  $tqty += $eachProduct->quantity;
                  $rqty += $eachProduct->quantity - $eachProduct->return_quantity;
+                 $pstock = helper::getProductStock($eachProduct->product_id);
+                 $present_stock +=$pstock;
               @endphp
 
             <tr class="new_item{{$key}}">
               @if(in_array('product_id',$activeColumn))
                <td> {{$eachProduct->product->name}}</td>
                @endif
-               @if(in_array('pack_size',$activeColumn))
+               {{-- @if(in_array('pack_size',$activeColumn))
                <td class="text-right"> {{$eachProduct->pack_size}}</td>
                @endif
                @if(in_array('pack_no',$activeColumn))
                <td class="text-right"> {{$eachProduct->pack_no}}</td>
-               @endif
+               @endif --}}
                @if(in_array('quantity',$activeColumn))
                <td class="text-right"> <input type="number" required=""  name="quantity[]" class="form-control quantity decimal" id="" placeholder="Quantity" value="{{$eachProduct->quantity}}" readonly="readonly"></td>
                @endif
                <td> <input type="number" required=""  name="remaining_quantity[]" class="form-control remaining_quantity decimal" id="" placeholder="Quantity" value="{{$eachProduct->quantity - $eachProduct->return_quantity}}" readonly="readonly"></td>
+               <td> <input type="number" required=""  name="present_stock[]" class="form-control present_stock decimal" readonly id="" placeholder="Present Stock" value="{{ $pstock ?? 0 }}" ></td>
+
                <td> <input type="number" required=""  name="return_quantity[]" class="form-control return_quantity decimal" id="" placeholder="Return Quantity" value="" ></td>
               
                @if(in_array('unit_price',$activeColumn))
@@ -107,6 +113,9 @@
                @if(in_array('total_price',$activeColumn))
                <td> <input type="number" required=""  name="total_price[]" readonly="" class="form-control total_price decimal" id="" placeholder="Total Price" value=""></td>
                @endif
+               <td class="text-center"><button del_id="1" class="delete_item btn btn-danger"
+                  type="button" href="javascript:;" title="Are you Remove?"><i class="fa fa-minus"></i></button>
+               </td>
             </tr>
             @endforeach
          </tbody>
@@ -118,16 +127,16 @@
                @if(in_array('batch_no',$activeColumn))
                {{-- <td class="text-right table_data_batch_no"><span class="sub_total_batch_no"></span></td> --}}
                @endif
-               @if(in_array('pack_size',$activeColumn))
+               {{-- @if(in_array('pack_size',$activeColumn))
                <td class="text-right table_data_pack_size"><span class="sub_total_pack_size">@php echo number_format($tpsize,2); @endphp</span></td>
                @endif
 
                @if(in_array('pack_no',$activeColumn))
                <td class="text-right pack_no"><span class="sub_total_pack_no">@php echo number_format($tpno,2); @endphp </span></td>
-               @endif
-
+               @endif --}}
                <td class="text-right table_data_quantity"><span class="sub_data_quantity">@php echo number_format($tqty,2); @endphp</span></td>
                <td class="text-right table_data_remaining"><span class="sub_data_remaining">@php echo number_format($rqty,2); @endphp</span></td>
+               <td class="text-right table_data_remaining"><span class="sub_present_stock">@php echo number_format($present_stock,2); @endphp</span></td>
                <td class="text-right table_data_return"><span class="sub_data_return">0.00</span></td>
                <td class="text-right table_data_unit_price"><span class="sub_data_unit_price">0.00</span></td>
                <td class="text-right table_data_deduction"><span class="sub_data_deduction">0.00</span></td>
@@ -146,10 +155,16 @@
                <td class="grand_total text-right" colspan="@php helper::getColspan($activeColumn,4);@endphp">Grand Total:</td>
                <td><input  type="text" id="grand_total" readonly="" class="form-control grandTotal" value="" name="grand_total" placeholder="0.00"></td>
             </tr>
-            <tr>
-               <td class="grand_total text-right" colspan="@php helper::getColspan($activeColumn,4);@endphp">Payment:</td>
-               <td><input  type="text" id="paid_amount" class="form-control payment" value="" name="paid_amount" placeholder="0.00"></td>
+            <tr class="div_payment" style="display: none!important">
+               <td class="grand_total text-right" colspan="@php helper::getColspan($activeColumn,4);@endphp">Available Balance:</td>
+               <td><input  type="text" id="accountBalance" class="form-control accountBalance" value="" readonly name="accountBalance" placeholder="0.00"></td>
             </tr>
+
+            <tr class="div_payment" required style="display: none!important">
+               <td class="grand_total text-right" required colspan="@php helper::getColspan($activeColumn,4);@endphp">Payment:</td>
+               <td><input  type="text" id="paid_amount" class="form-control payment" required value="" name="paid_amount" placeholder="0.00"></td>
+            </tr>
+
             <tr>
                <td class="note" colspan="@php helper::getColspan($activeColumn,4);@endphp"><textarea  name="note" rows="4" placeholder="Type Note Here..."></textarea></td>
             </tr>
@@ -163,11 +178,16 @@
            var return_quantity = Number(tr.find('input.return_quantity').val()-0);
            var deduction = Number(tr.find('input.deduction').val()-0);
            var remaining_quantity = Number(tr.find('input.remaining_quantity').val()-0);
+           var present_stock = Number(tr.find('input.present_stock').val()-0);
            var unit_price = Number(tr.find('input.unit_price').val()-0);
 
            if(return_quantity > remaining_quantity){
                tr.find('input.return_quantity').val(remaining_quantity);
                Swal.fire('Warning!', "Approved QTY can't greater than from main qty", 'warning');  
+           }
+           else if(return_quantity > present_stock){
+               tr.find('input.return_quantity').val(present_stock);
+               Swal.fire('Warning!', "Approved QTY can't greater than from stock qty", 'warning');  
            }
           var deducAmount = (unit_price/100)*deduction;
           console.log(deducAmount);
@@ -222,14 +242,14 @@
          $('#deduction_amount').val(total_deduction_percentage_amount.toFixed(2));
          $('#sub_total').val(total_price_amount.toFixed(2));
          $('#grand_total').val((total_price_amount-total_deduction_percentage_amount).toFixed(2));
-         $('#paid_amount').val((total_price_amount-total_deduction_percentage_amount).toFixed(2));
+         // $('#paid_amount').val((total_price_amount-total_deduction_percentage_amount).toFixed(2));
    }
 
    
 $(document).on('change', '.payment_type', function() {
    let payment_type = $(this).val();
    if(payment_type == 'Cash'){
-       $('.div_account_id').removeClass("hide");
+      //  $('.div_account_id').removeClass("hide");
        $('.div_bank_id').addClass('hide');
    }else if(payment_type == 'Credit'){
        $('.div_account_id').addClass("hide");
@@ -240,6 +260,78 @@ $(document).on('change', '.payment_type', function() {
    }  
 
 });
+
+$(document).on('click', '.delete_item', function() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let totalRow = $('.batch_no').length
+                if (totalRow == 1) {
+                    Swal.fire('Warning!', "There only one row you can't delete", 'warning');
+                } else {
+                    let id = $(this).attr("del_id");
+                    $('.new_item' + id).remove();
+                    calculation();
+                    Swal.fire('Successs!', 'You are remove one item!.', 'success');
+                }
+
+            }
+        })
+    });
+
+    $(document).ready(function() {
+
+
+$('.account_balance').on('change', function() {
+  
+    let payment_type = $(this).find(":selected").attr('value');
+    if(payment_type =='Cash'){
+        $.ajax({
+            "url": "{{ route('accountSetup.chartOfAccount.getAccountBalance') }}",//new route
+            "dataType": "json",
+            "type": "GET",
+            "data": {
+                "_token": "<?= csrf_token() ?>",
+                "account_id": 7,
+            }
+        }).done(function(data) {
+
+        $('.accountBalance').val(data);
+
+        })
+ 
+}else{
+    $('.accountBalance').val(0);
+}
+});
+
+$('.bank_val_id').on('change', function() {
+    let bank_id = $(this).find(":selected").attr('value');
+    $.ajax({
+        "url": "{{ route('accountSetup.chartOfAccount.getAccountBankBalance') }}",//new route
+        "dataType": "json",
+        "type": "GET",
+        "data": {
+            "_token": "<?= csrf_token() ?>",
+            "bank_id": bank_id,
+        }
+    }).done(function(data) {
+
+       $('.accountBalance').val(data);
+
+    })
+});
+
+
+});
+
 </script>
 @else 
 

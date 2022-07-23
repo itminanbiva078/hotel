@@ -45,7 +45,7 @@
                 
                     <td class="color3 text-right">
                         
-                        @if($report->type == 'in' || $report->type == 'tin' || $report->type == 'rin')
+                        @if($report->type == 'in' || $report->type == 'tin' || $report->type == 'rin' || $report->type == 'adin')
                         
                                 {{$report->quantity ?? ''}}
                                 
@@ -58,7 +58,7 @@
                    
               
                  <td class="color2 text-right">
-                    @if($report->type == 'out' || $report->type == 'tout' || $report->type == 'rout')
+                    @if($report->type == 'out' || $report->type == 'tout' || $report->type == 'rout' || $report->type == 'adout')
                     
                         {{$report->quantity ?? ''}}
                         @php 

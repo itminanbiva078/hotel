@@ -35,6 +35,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Backend'], function () {
         Route::get('/inventory-setup-floor-explode', 'FloorController@floorExplode')->name('inventorySetup.floor.explode');
         //Floor crud operation end
 
+        
         //product crud operation start
         Route::get('/inventory-setup-product-list', 'ProductController@index')->name('inventorySetup.product.index');
         Route::get('/dataProcessingProduct', 'ProductController@dataProcessingProduct')->name('inventorySetup.product.dataProcessingProduct');

@@ -75,13 +75,10 @@ class AccountReport extends Controller
             $from_date = date('Y-m-d',strtotime($from_to_date[0]));
             $to_date = date('Y-m-d',strtotime($from_to_date[1]));
             $oldValue = $request->all();
-           
-
-            $assetLedger = Journal::getChildList(2,$from_date);
-            $liabilityLedger = Journal::getChildList(31,$from_date,null,'liability');
-            $incomeLedger = Journal::getChildList(41,$from_date);
-            $expenseLedger = Journal::getChildList(50,$from_date);
-
+            $assetLedger = Journal::getChildList(2,$from_date,$to_date);
+            $liabilityLedger = Journal::getChildList(31,$from_date,$to_date,'liability');
+            $incomeLedger = Journal::getChildList(41,$from_date,$to_date);
+            $expenseLedger = Journal::getChildList(50,$from_date,$to_date);
            
         }
         $title = 'Trial Balance';

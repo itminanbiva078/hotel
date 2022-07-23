@@ -1,6 +1,6 @@
 @extends('backend.layouts.master')
 @section('title')
-General Ledger Report
+Journal Check
 @endsection
 
 @section('styles')
@@ -21,7 +21,7 @@ table#show_item tr td {
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{route('home')}}">Dashboard</a></li>
-                    <li class="breadcrumb-item active"><span>General Ledger Report</span></li>
+                    <li class="breadcrumb-item active"><span>Journal Check</span></li>
                 </ol>
             </div><!-- /.col -->
         </div><!-- /.row -->
@@ -154,8 +154,8 @@ table#show_item tr td {
                                                                     <tr  style="background-color: #9cbdb9!important;">
                                                                         <td width="18.5%"><i class="fa fa-minus"></i> {{$eachLedger->date}}</td>
                                                                         <td width="10%">  <?php echo helper::getVoucher($eachLedger);?></td>
-                                                                        <td width="10%">{{$eachLedger->formType->name}}</td>
-                                                                        <td width="10%"> {{$subLedger->account->name}}</td>
+                                                                        <td width="10%">{{$eachLedger->formType->name ?? ''}}</td>
+                                                                        <td width="10%"> {{$subLedger->account->name ?? ''}}</td>
                                                                         <td width="10%" class="text-right"> {{helper::pricePrint($subLedger->debit)}}  </td>
                                                                         <td width="10%" class="text-right"> {{helper::pricePrint($subLedger->credit)}}  </td>
                                                                         <td width="10%" class="text-right">0.00</td>

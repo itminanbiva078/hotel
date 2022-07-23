@@ -19,5 +19,8 @@ class PosDetails extends Model
     public function product(){
         return $this->belongsTo(Product::class,'product_id','id');
     }
+    public function batch(){
+        return $this->belongsTo(BatchNumber::class,'batch_no','id');
+    }
  
 }

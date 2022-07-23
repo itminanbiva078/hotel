@@ -2783,3 +2783,53 @@ font-size: 15px;}
     background: #5f6f72;
     transform: translateX(-50%);
 }
+
+.card-body form.needs-validation label span {
+    color: red;
+}
+
+.card-body.sale-return-create select.saleType {
+    width: 30%;
+    margin-right: 20px;
+}
+
+form.needs-validation .form-group input {
+    font-size: 12px;
+}
+
+form.needs-validation table#salesReturn tr td {
+    padding: 2px;
+    align-items: center;
+}
+
+form.needs-validation .table tr td {
+    padding: 2px;
+}
+
+.invoice table tr td {
+    padding: 2px;
+}
+
+.invoice table tr th {
+    padding: 2px;
+}
+
+div#journalDetails {
+    width: 100%;
+}
+
+.voucher-footer {
+    width: 100%;
+}
+
+.card-body table tr td {
+    padding: 2px !important;
+}
+
+.card-body table tr th {
+    padding: 2px !important;
+}
+
+.card-footer .loadPurchasesInvoice {
+    width: 100%;
+}

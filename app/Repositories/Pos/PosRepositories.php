@@ -157,12 +157,14 @@ class PosRepositories
                 $q->select('id', 'pos_id', 'branch_id', 'batch_no', 'date', 'pack_size', 'pack_no', 'discount', 'quantity', 'unit_price', 'total_price', 'company_id', 'product_id');
             }, 'posDetails.product' => function ($q) {
                 $q->select('id', 'code', 'name', 'category_id', 'status', 'brand_id', 'company_id');
+            }, 'customer' => function ($q) {
+                $q->select('id', 'code', 'name', );
             }
         ])->where('id', $id)->first();
         return $result;
     }
 
-   
+
     /**
      * @param $request
      * @return mixed
@@ -234,8 +236,6 @@ class PosRepositories
 
     public function store($request)
     {
-        //dd($request->all());
-
         DB::beginTransaction();
         try 
         { 
@@ -290,19 +290,18 @@ class PosRepositories
         //general table data save
         $general_id = $this->salesPayment->generalSave($pos->id,17);
         //sales credit journal
-        Journal::saleCreditJournal($general_id,$costOfGoodSold);
+        Journal::posSaleCreditJournal($general_id,$costOfGoodSold);
         //if payment type cash then
         $this->salesPayment->salesCreditPayment($pos->id,$pos->grand_total,$pos->payment_type,null,17);
         //sales payment journal
         $accountId =  helper::posDepositAccount();
-        Journal::salePaymentJournal($pos->id,$pos->grand_total,$accountId,$pos->date,17);
+        Journal::posSalePaymentJournal($general_id,$pos->grand_total,$accountId,$pos->date,17);
         $pos->status =  'Approved';
         $this->salesPayment->stockSave($general_id, $pos->id,17);
         //stock cashing table data save
         $this->salesPayment->stockSummarySave($pos->id,17);
         //sales order
        return true;
-
 
     }
 
@@ -330,9 +329,12 @@ class PosRepositories
             $masterDetails['unit_price']  = $request->unit_price[$key];
             $masterDetails['total_price']  = $request->total_price[$key];
             array_push($allDetails, $masterDetails);
-            $costOfGoods+=helper::productAvg($masterDetails['product_id'],$masterDetails['batch_no']);
-        endforeach;
+            $singleProductAvgPrice =helper::productAvg($masterDetails['product_id'],$masterDetails['batch_no']);
+            $costOfGoods+=$singleProductAvgPrice*$request->quantity[$key];
+                endforeach;
+
          PosDetails::insert($allDetails);
+
         return $costOfGoods;
     }
    
@@ -341,8 +343,9 @@ class PosRepositories
 
        $posDetails =  PosDetails::where('pos_id', $pos_id)->get();
        $costOfGoods=0;
-       foreach($posDetails as $key => $eachDetails): 
-        $costOfGoods+=helper::productAvg($eachDetails->product_id,$eachDetails->batch_no);
+       foreach($posDetails as $key => $value): 
+        $singleProductAvgPrice = helper::productAvg($value->product_id,$value->batch_no);
+        $costOfGoods+=$singleProductAvgPrice*$value->quantity;
        endforeach;
        return $costOfGoods;
 

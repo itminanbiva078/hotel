@@ -88,22 +88,21 @@
     
 $(function() {
 
-
     <?php foreach($images as $key => $eachImage): 
-            $demo_class =  helper::imageUrl($eachImage->image);
+            $demo_class =  helper::pImageUrl($eachImage->image);
             $demo_class = str_replace("/","_",$demo_class);
             $demo_class = str_replace(".","_",$demo_class);
-    
     ?>
-        var mockFile = { name: "Image"+<?php echo $key+1;?>,img_url: "<?php  echo helper::imageUrl($eachImage->image);?>", size: "<?php  getimagesize(helper::imageUrl($eachImage->image));?>" };
+    
+        var mockFile = { name: "Image"+<?php echo $key+1;?>,img_url: "<?php  echo helper::pImageUrl($eachImage->image);?>", size: "<?php  getimagesize(helper::pImageUrl($eachImage->image));?>" };
         myDropzone.options.addedfile.call(myDropzone, mockFile);
-        myDropzone.options.thumbnail.call(myDropzone, mockFile, "/<?php  echo helper::imageUrl($eachImage->image) ?>");
+        myDropzone.options.thumbnail.call(myDropzone, mockFile, "/<?php  echo helper::pImageUrl($eachImage->image) ?>");
         mockFile.previewElement.querySelector(".start").setAttribute("disabled", "disabled")
         mockFile.previewElement.querySelector(".cancel").setAttribute("disabled", "disabled")
-        mockFile.previewElement.querySelector(".delete").setAttribute("img_name", "<?php  echo helper::imageUrl($eachImage->image);?>")
+        mockFile.previewElement.querySelector(".delete").setAttribute("img_name", "<?php  echo helper::pImageUrl($eachImage->image);?>")
         document.querySelector("#total-progress .progress-bar").style.width = 100 + "%";
 
-        $(".attached_files").after("<input type='hidden' class='<?php echo $demo_class?>' id='<?php echo $demo_class?>' name='attached_files[]' value='<?php echo helper::imageUrl($eachImage->image)?>'/>");
+        $(".attached_files").after("<input type='hidden' class='<?php echo $demo_class?>' id='<?php echo $demo_class?>' name='attached_files[]' value='<?php echo helper::pImageUrl($eachImage->image)?>'/>");
          
     <?php endforeach;?>
 

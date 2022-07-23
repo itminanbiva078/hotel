@@ -533,7 +533,6 @@ class GeneralSettingRepository
         return redirect()->back();
 
     }
-  
 
     public function updateNavigationTable($table,$value){
         $affected = Navigation::where('table',$table)->first();

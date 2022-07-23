@@ -56,14 +56,14 @@ $total_days = $total_days;
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                    <label for="name">Name</label>
+                                    <label for="name">Name <span class="text-danger" style="font-size: 20px;">*</span></label>
                                     <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ $user->name ?? old('name') }}">
 
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="phone">Phone</label>
+                                        <label for="phone">Phone <span class="text-danger" style="font-size: 20px;">*</span></label>
                                         <input type="number" class="form-control @error('phone') is-invalid @enderror" name="phone" id="phone" placeholder="Phone Number" value="{{ $user->phone ?? old('phone') }}" readonly>
                                         @error('phone')
                                         <span class="invalid-feedback" role="alert">
@@ -74,7 +74,7 @@ $total_days = $total_days;
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="email">Email</label>
+                                        <label for="email">Email <span class="text-danger" style="font-size: 20px;">*</span></label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" placeholder="Email" value="{{ $user->email ?? old('email') }}" required>
                                         @error('email')
                                         <span class="invalid-feedback" role="alert">
@@ -85,8 +85,8 @@ $total_days = $total_days;
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                    <label for="address">Address</label>
-                                    <input type="text" class="form-control" name="address" id="address" placeholder="Address" value="{{ $user->address ?? '' }}">
+                                    <label for="address">Address <span class="text-danger" style="font-size: 20px;">*</span></label>
+                                    <input type="text" class="form-control" required name="address" id="address" placeholder="Address" value="{{ $user->address ?? '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -122,12 +122,12 @@ $total_days = $total_days;
                         </div>
                         <div class="form-group custom-control custom-checkbox mb-3">
                             <input type="checkbox" class="custom-control-input" id="vehicle1" name="hotel_policy" value="hotel_policy" required>
-                            <label class="custom-control-label" for="vehicle1" style="display: contents;"> Accept All Policies Of Hotel
+                            <label class="custom-control-label" for="vehicle1" style="display: contents;"> Accept All Policies Of Hotel <span class="text-danger" style="font-size: 20px;">*</span>
                             {!!$hotel_policy!!} <a href=" #" type="button"  data-toggle="modal" data-target=".hotel-policy-modal"> Reed More </a></label>
                         </div>
                         <div class="form-group custom-control custom-checkbox mb-3">
                             <input type="checkbox" id="vehicle2" class="custom-control-input" name="guset_policy" value="guset_policy" required>
-                            <label class="custom-control-label" for="vehicle2" style="display: contents;">Accept All Policies Of Guest 
+                            <label class="custom-control-label" for="vehicle2" style="display: contents;">Accept All Policies Of Guest <span class="text-danger" style="font-size: 20px;">*</span>
                             {!!$guset_policy!!} <a href=" #" type="button"  data-toggle="modal" data-target=".geaust-policy-modal"> Reed More </a> </label>
                         </div>
                         <div class="modal fade hotel-policy-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -246,7 +246,7 @@ $total_days = $total_days;
                             <table class="table">
                                 <tr>
                                     <td> {{$product->name ?? ''}} </td>
-                                    <td> {{$product->sale_price ?? ''}} TK x {{$total_days}} days</td>
+                                    <td> {{$product->sale_price ?? ''}} TK x {{ $total_days == 0 ? 1 : $total_days }} days</td>
                                 </tr>
                                 <tr>
                                     <td> Add On </td>
@@ -254,18 +254,21 @@ $total_days = $total_days;
                                 </tr>
                                 <tr>
                                     <td> Total </td>
-                                    <td id="total_price"> {{$product->sale_price*$total_days}}  TK </td>
+                                    <td id="total_price"> {{ $total_days == 0 ? $product->sale_price*1 : $product->sale_price*$total_days}}  TK </td>                   
                                 </tr>
 
                                 @php 
-                                $grand_total = $product->sale_price*$total_days;
-
+                                if ($total_days == 0) {
+                                    $grand_total = $product->sale_price*1;   
+                                }else {
+                                    $grand_total = $product->sale_price*$total_days;
+                                }
                                 $advance_percentage_percentage = $product->productDetails->advance_percentage;
                                 $advance_payment_amount = ($grand_total * $advance_percentage_percentage)/100;
                                 @endphp
 
                                 <tr>
-                                    <td>Advance Payment</td>
+                                    <td>Advance Payment <span class="text-danger" style="font-size: 20px;">*</span></td>
                                     <td>
                                         <div class="custom-control custom-checkbox mb-3">
                                             <input name="pay_only_advance_payment" value="1" type="checkbox" class="custom-control-input" id="advance-payment" required>
@@ -279,7 +282,7 @@ $total_days = $total_days;
                         </div>
                         <div class="submit-now-btn">
                         
-                            <button type="submit" class="btn btn-sm"> Pay Now</button>
+                            <button type="submit" class="btn btn-sm"> Pay Now </button>
                         </div>
                     </div>
                 </div>
