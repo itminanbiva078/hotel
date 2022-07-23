@@ -36,6 +36,7 @@
             $('.payment').addClass("border border-danger");
         }
 
+
         $('input[name^="product_id"]').each(function() {
             if($(this).find(':selected')){
                 $(this).addClass("border border-success");
@@ -534,6 +535,47 @@
     
             })
         });
+
+        $('.account_balance').on('change', function() {
+            let payment_type = $(this).find(":selected").attr('value');
+            if(payment_type =='Cash'){
+                $.ajax({
+                    "url": "{{ route('accountSetup.chartOfAccount.getAccountBalance') }}",//new route
+                    "dataType": "json",
+                    "type": "GET",
+                    "data": {
+                        "_token": "<?= csrf_token() ?>",
+                        "account_id": 7,
+                    }
+                }).done(function(data) {
+
+                $('.accountBalance').val(data);
+
+                })
+         
+        }else{
+            $('.accountBalance').val(0);
+        }
+        });
+
+        
+        $('.bank_val_id').on('change', function() {
+            let bank_id = $(this).find(":selected").attr('value');
+            $.ajax({
+                "url": "{{ route('accountSetup.chartOfAccount.getAccountBankBalance') }}",//new route
+                "dataType": "json",
+                "type": "GET",
+                "data": {
+                    "_token": "<?= csrf_token() ?>",
+                    "bank_id": bank_id,
+                }
+            }).done(function(data) {
+
+               $('.accountBalance').val(data);
+
+            })
+        });
+
     });
 
 
@@ -656,15 +698,20 @@
     });
 
 
-$(document).on('change', '.payment_type', function() {
+
+
+    $(document).on('change', '.payment_type', function() {
     let payment_type = $(this).val();
     if(payment_type == 'Cash'){
-        $('.div_account_id').removeClass("hide");
+        // $('.div_account_id').removeClass("hide");
         $('.div_bank_id').addClass('hide');
         $('.div_cheque_number').addClass("hide");
         $('.div_bank_id').addClass("hide");
         $('.div_cheque_date').addClass("hide");
         $('.div_payment').show();
+        $('.div_accountBalance').show();
+        $('.payment').val(0);
+        $('#paid_amount,.payment').trigger('keyup');
     }else if(payment_type == 'Credit'){
         $('.div_account_id').addClass("hide");
         $('.div_bank_id').addClass("hide");
@@ -678,34 +725,66 @@ $(document).on('change', '.payment_type', function() {
         $('.div_cheque_number').removeClass("hide");
         $('.div_cheque_date').removeClass("hide");
         $('.div_payment').show();
-    }   
-});
-
-
-$(document).on('keyup', '#paid_amount', function() {
-  
-  var thisPayment = parseFloat($(this).val()-0);
-  var grandTotal = parseFloat($(".grandTotal").val()-0);
-
-    if(grandTotal > thisPayment ){
-        $(this).removeClass("border border-danger");
-        $(this).addClass("border border-success");
-        $("#due_amount").val(grandTotal-thisPayment);
-        $("#due_amount").addClass("bg-danger border-success");
-       
-    }else if(grandTotal < thisPayment){
-        Swal.fire('Warning!', 'Payment should be less than grand total.', 'warning' );
-        $(this).val(grandTotal);
-        $("#due_amount").val(0);
-        $("#due_amount").removeClass("bg-danger border-success");
-        $("#due_amount").addClass("bg-success border-success");
-        $(this).removeClass("border border-success");
-        $(this).addClass("border border-danger");
-    }else{
-        $("#due_amount").removeClass("bg-danger border-success");
-        $("#due_amount").addClass("bg-primary border-success text-black");
+        $('.div_accountBalance').show();
     }
 });
+
+$(document).on('keyup', '#paid_amount,.payment', function() {
+
+var thisPayment = parseFloat($(this).val()-0);
+var grandTotal = parseFloat($(".grandTotal").val()-0);
+var accountBalance = parseFloat($(".accountBalance").val()-0);
+
+  if(grandTotal > thisPayment ){
+      $(this).removeClass("border border-danger");
+      $(this).addClass("border border-success");
+      $("#due_amount").val(grandTotal-thisPayment);
+      $("#due_amount").addClass("bg-danger border-success");
+
+  }else if(grandTotal < thisPayment){
+      Swal.fire('Warning!', 'Payment should be less than grand total.', 'warning' );
+      $(this).val(grandTotal);
+      $("#due_amount").val(0);
+      $("#due_amount").removeClass("bg-danger border-success");
+      $("#due_amount").addClass("bg-success border-success");
+      $(this).removeClass("border border-success");
+      $(this).addClass("border border-danger");
+  }
+
+
+  if(accountBalance > thisPayment ){
+      $(this).removeClass("border border-danger");
+      $(this).addClass("border border-success");
+      $("#due_amount").val(accountBalance-thisPayment);
+      $("#due_amount").addClass("bg-danger border-success");
+
+  }else if(accountBalance < thisPayment){
+      <?php 
+
+      $saleRoute = array(
+          'salesTransaction.sales.create',
+          'salesTransaction.sales.edit',
+      );
+      if(!in_array(Route::currentRouteName(),$saleRoute)): ?>
+     
+      Swal.fire('Warning!', 'Payment should be less than account balance.', 'warning' );
+      $(this).val(accountBalance);
+      $("#due_amount").val(0);
+      $("#due_amount").removeClass("bg-danger border-success");
+      $("#due_amount").addClass("bg-success border-success");
+      $(this).removeClass("border border-success");
+      $(this).addClass("border border-danger");
+      <?php endif ;?>
+  }
+
+
+  else{
+      $("#due_amount").removeClass("bg-danger border-success");
+      $("#due_amount").addClass("bg-primary border-success text-black");
+  }
+});
+
+
 
 setTimeout(function(){ 
 $('.product_type').trigger('change');

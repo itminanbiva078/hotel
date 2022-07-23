@@ -168,7 +168,7 @@ class ReceiveVoucherRepositories
         $poMaster->branch_id  = $request->branch_id ?? helper::getDefaultBranch();
         $poMaster->supplier_id  = $request->supplier_id;
         $poMaster->customer_id  = $request->customer_id;
-        $poMaster->status  = 'Pending';
+        $poMaster->status  = 'Approved';
         $poMaster->note  = $request->note;
         $poMaster->updated_by = Auth::user()->id;
         $poMaster->company_id = Auth::user()->company_id;

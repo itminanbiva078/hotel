@@ -245,10 +245,15 @@ class PurchasesReturnRepositories
                 $poMaster =  new $this->purchasesReturn();
                 $poMaster->date = helper::mysql_date();
                 $poMaster->payment_type  = $request->payment_type;
-                $poMaster->purchases_id  = $request->purchases_id;
+                $poMaster->purchases_id  = $request->purchases_id ;
                 $poMaster->supplier_id   = $purchasessInfo->supplier_id;
-                $poMaster->branch_id  = $purchasessInfo->branch_id;
-                $poMaster->store_id  = $purchasessInfo->store_id;
+                $poMaster->branch_id  = $purchasessInfo->branch_id ?? helper::getDefaultBranch();
+                $poMaster->store_id  = $purchasessInfo->store_id ?? helper::getDefaultStore();
+                
+                if(!empty($request->account_id)):
+                    $poMaster->account_id  = $request->account_id[0];
+                endif;
+
                 $poMaster->voucher_no  = $purchasessInfo->voucher_no;
                 $poMaster->subtotal  = $request->sub_total;
                 $poMaster->documents  = $request->documents;
@@ -256,6 +261,8 @@ class PurchasesReturnRepositories
                 $poMaster->deduction_amount  = $request->deduction_amount;
                 $poMaster->deduction_percen  = array_sum($request->deduction);
                 $poMaster->grand_total  = $request->grand_total;
+                $poMaster->paid_amount  = $request->paid_amount;
+                $poMaster->due_amount  = $request->grand_total;
                 $poMaster->note  = $request->note;
                 $poMaster->status  = 'Pending';
                 $poMaster->created_by = Auth::user()->id;
@@ -270,12 +277,26 @@ class PurchasesReturnRepositories
                         $general_id = $this->generalSave($poMaster->id,$request);
                         //purchases return Journal
                         $this->purchasesReturnJournal($general_id,$request);
-                        //purchases payment journal          
+                        //purchases payment journal  
+                        
+                        // if payment type cash    
+                    if($request->payment_type == "Cash"):
+            
+                       $this->purchasesReturnCashPayment($poMaster->id,$request->paid_amount);
+                       $this->purchasesReturnPaymentJournal($general_id,$request->paid_amount,$request->date);
+                        // if payment type cash
+                    endif;
+
+                    if($request->payment_type == "Bank"):
+                        //if bank
                         $this->purchasesReturnPaymentJournal($general_id,$request);
-                        //main stock table data save
-                        $this->stockSave($general_id,$poMaster->id,$request->purchases_id);
-                        //stock cashing table data save
-                        $this->stockSummarySave($poMaster->id,$request->purchases_id);
+                    endif;
+                    
+                          //main stock table data save
+                          $this->stockSave($general_id,$poMaster->id,$request->purchases_id);
+                          //stock cashing table data save
+                          $this->stockSummarySave($poMaster->id,$request->purchases_id);
+
                         $poMaster->status  = 'Approved';
                         $poMaster->save();
                     endif;             
@@ -353,8 +374,6 @@ class PurchasesReturnRepositories
         $purchasesReturnCreditPayment->created_by = Helper::userId();
         $purchasesReturnCreditPayment->save();
 
-       
-
         return $purchasesReturnCreditPayment->id;
     }
 
@@ -390,80 +409,83 @@ class PurchasesReturnRepositories
     public function purchasesReturnJournal($masterLedgerId,$request){
         $generalInfo=General::find($masterLedgerId);
 
-        //account Receiable = credit
-         $accountReceiveable = new GeneralLedger();
-         $accountReceiveable->company_id = helper::companyId();
-         $accountReceiveable->general_id = $masterLedgerId;
-         $accountReceiveable->form_id = 5;
-         $accountReceiveable->account_id = 38;//account receiable come from chartOfAccount
-         $accountReceiveable->date = helper::mysql_date($request->date);
-         $accountReceiveable->credit = $generalInfo->debit;
-         $accountReceiveable->memo ='Account Receiable';
-         $accountReceiveable->created_by =helper::userId();
-         $accountReceiveable->save();
-         //purchases = debit
-         $purchases = new GeneralLedger();
-         $purchases->company_id = helper::companyId();
-         $purchases->general_id = $masterLedgerId;
-         $purchases->form_id = 5;
-         $purchases->account_id = 44;//purchases stock or inventory stock
-         $purchases->date = helper::mysql_date($request->date);
-         $purchases->debit = $generalInfo->debit;
-         $purchases->memo ='Sales';
-         $purchases->created_by =helper::userId();
-         $purchases->save();
-        //purchases = debit
+        //account Payable = debit
+         $accountPayable = new GeneralLedger();
+         $accountPayable->company_id = helper::companyId();
+         $accountPayable->general_id = $masterLedgerId;
+         $accountPayable->form_id = 5;
+         $accountPayable->account_id = 38;//account receiable come from chartOfAccount
+         $accountPayable->date = helper::mysql_date($request->date);
+         $accountPayable->debit = $generalInfo->debit;
+         $accountPayable->memo ='Account Payable';
+         $accountPayable->created_by =helper::userId();
+         $accountPayable->save();
+
+        //purchases = credit
          $purchases = new GeneralLedger();
          $purchases->company_id = helper::companyId();
          $purchases->general_id = $masterLedgerId;
          $purchases->form_id = 5;
          $purchases->account_id = 4;//account payable come from chartOfAccount
          $purchases->date = helper::mysql_date($request->date);
-         $purchases->debit = $generalInfo->debit;
-         $purchases->memo ='Purchases';
+         $purchases->credit = $generalInfo->debit;
+         $purchases->memo ='Purchases Stock';
          $purchases->created_by =helper::userId();
          $purchases->save();
-         //cost of good sold = credit
-         $costOfGoodSols = new GeneralLedger();
-         $costOfGoodSols->company_id = helper::companyId();
-         $costOfGoodSols->general_id = $masterLedgerId;
-         $costOfGoodSols->form_id = 5;
-         $costOfGoodSols->account_id = 52;//purchases stock or inventory stock
-         $costOfGoodSols->date = helper::mysql_date($request->date);
-         $costOfGoodSols->credit = $generalInfo->debit;
-         $costOfGoodSols->memo ='Cost Of Goods Sold';
-         $costOfGoodSols->created_by =helper::userId();
-         $costOfGoodSols->save();
      }
  
+     
+     public function purchasesReturnCashPayment($purchasesReturnId,$payment)
+     {
  
-     public function purchasesReturnPaymentJournal($masterLedgerId,$request){
+         $purchasesInfo = $this->purchasesReturn::find($purchasesReturnId);
+         $purchasesReturnCreditPayment =  new PurchasesPayment();
+         $purchasesReturnCreditPayment->date = helper::mysql_date();
+         $purchasesReturnCreditPayment->company_id = $purchasesInfo->company_id; //purchases info
+         $purchasesReturnCreditPayment->supplier_id  = $purchasesInfo->supplier_id;
+         $purchasesReturnCreditPayment->branch_id  = $purchasesInfo->branch_id ?? helper::getDefaultBranch();
+         $purchasesReturnCreditPayment->voucher_id  = $purchasesInfo->id;
+         $purchasesReturnCreditPayment->payment_type  = 'Cash';
+         $purchasesReturnCreditPayment->voucher_no  = helper::generateInvoiceId("purchases_payment_prefix","purchases_payments");
+         $purchasesReturnCreditPayment->debit  = $payment;
+         $purchasesReturnCreditPayment->status  = 'Approved';
+         $purchasesReturnCreditPayment->note  = 'Purchases Reutrn';
+         $purchasesReturnCreditPayment->updated_by = Helper::userId();
+         $purchasesReturnCreditPayment->created_by = Helper::userId();
+         $purchasesReturnCreditPayment->save();
+         $dueAmount = $purchasesInfo->grand_total- ($purchasesInfo->paid_amount+$payment);
+         $purchasesInfo->paid_amount = $purchasesInfo->paid_amount+$payment;
+         $purchasesInfo->due_amount =$dueAmount;
+         $purchasesInfo->save();
+         return $purchasesReturnCreditPayment->id;
+     }
+ 
+     public function purchasesReturnPaymentJournal($masterLedgerId,$payment,$date){
         $generalInfo=General::find($masterLedgerId);
-
-         //account receivable = debit
-         $accountReceiveable = new GeneralLedger();
-         $accountReceiveable->company_id = helper::companyId();
-         $accountReceiveable->general_id = $masterLedgerId;
-         $accountReceiveable->form_id = 5;
-         $accountReceiveable->account_id = 38;//account receiable come from chartOfAccount
-         $accountReceiveable->date = helper::mysql_date($request->date);
-         $accountReceiveable->credit = $generalInfo->debit;
-         $accountReceiveable->memo ='Account Payable';
-         $accountReceiveable->created_by =helper::userId();
-         $accountReceiveable->save();
+     
+         //account Payable = debit
+         $accountPayable = new GeneralLedger();
+         $accountPayable->company_id = helper::companyId();
+         $accountPayable->general_id = $masterLedgerId;
+         $accountPayable->form_id = 5;
+         $accountPayable->account_id = 38;//account receiable come from chartOfAccount
+         $accountPayable->date = helper::mysql_date($date);
+         $accountPayable->credit = $payment;
+         $accountPayable->memo ='Account Payable';
+         $accountPayable->created_by =helper::userId();
+         $accountPayable->save();
          //cash or bank = credit
          $cashOrBank = new GeneralLedger();
          $cashOrBank->company_id = helper::companyId();
          $cashOrBank->general_id = $masterLedgerId;
          $cashOrBank->form_id = 5;
          $cashOrBank->account_id = 7;//purchases stock or inventory stock
-         $cashOrBank->date = helper::mysql_date($request->date);
-         $cashOrBank->debit = $generalInfo->debit;
-         $cashOrBank->memo ='Purchases Stock';
+         $cashOrBank->date = helper::mysql_date($date);
+         $cashOrBank->debit = $payment;
+         $cashOrBank->memo ='Purchases payment';
          $cashOrBank->created_by =helper::userId();
          $cashOrBank->save();
      }
-
 
     public function generalSave($return_id){
         $purchasesInfo = $this->purchasesReturn::find($return_id);
@@ -480,7 +502,7 @@ class PurchasesReturnRepositories
         $general->company_id = helper::companyId();
         $general->save();
         return $general->id;
-        
+    
         
     }
 
@@ -497,7 +519,7 @@ class PurchasesReturnRepositories
             $generalStock['store_id']  = $value->store_id ?? helper::getDefaultStore();
             $generalStock['general_id'] =$general_id;
             $generalStock['product_id']  =$value->product_id;
-            $generalStock['batch_no']  =$value->batch_no ?? '';
+            $generalStock['batch_no']  =$value->batch_no ?? helper::getDefaultBatch();
             $generalStock['pack_size']  =$value->pack_size;
             $generalStock['pack_no']  =$value->pack_no;
             $generalStock['type']  ='rout';
@@ -511,6 +533,7 @@ class PurchasesReturnRepositories
        return $saveInfo;
     }
 
+    
     public function stockSummarySave($purchases_id){
         $salesReturnDetails = PurchasesReturnDetail::where('preturn_id',$purchases_id)->get();
         foreach($salesReturnDetails as $key => $value):
@@ -522,14 +545,13 @@ class PurchasesReturnRepositories
             }else{
                 //update exitsting row
                 $stockSummary = $stockSummaryExits;
-                $stockSummary->quantity =$stockSummary->quantity+$value->quantity;
+                $stockSummary->quantity =$stockSummary->quantity-$value->quantity;
             }
-            $stockSummary->branch_id = $value->branch_id;
-            $stockSummary->store_id = $value->store_id;
+            $stockSummary->branch_id = $value->branch_id ?? helper::getDefaultBranch();
+            $stockSummary->store_id = $value->store_id ?? helper::getDefaultStore();
             $stockSummary->company_id = helper::companyId();
-            $stockSummary->branch_id = $value->branch_id;
             $stockSummary->product_id = $value->product_id;
-            $stockSummary->batch_no = $value->batch_no;
+            $stockSummary->batch_no = $value->batch_no ?? helper::getDefaultBatch();
             $stockSummary->pack_size = $value->pack_size;
             $stockSummary->pack_no = $value->pack_no;
             $stockSummary->save();

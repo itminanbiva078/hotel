@@ -58,6 +58,7 @@ table#show_item tr td {
             </div>
             <form class="needs-validation" method="POST"  action="{{ route('inventoryTransaction.purchasesPayment.store') }}" novalidate>
             <!-- /.card-header -->
+            
             <div class="card-body">
                     @if(!empty($formInput) && is_array($formInput))
                     <div class="form-row">

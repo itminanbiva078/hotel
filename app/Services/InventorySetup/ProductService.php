@@ -78,6 +78,22 @@ class ProductService
             'status'               => 'required',
         ];
     }
+
+    public function validateRoomUniqueId($request)
+    {
+        return [
+            'room_no'=> 'unique:product_details,room_no',
+           
+        ];
+    }
+
+    public function validateRoomUniqueIdEdit($id)
+    {
+        return [
+            'room_no' => 'unique:product_details,room_no',
+           
+        ];
+    }
     /**
      * @param $request
      * @return \App\Models\Product

@@ -264,16 +264,13 @@ class BookingRepositories
     public function store($request)
     {
 
-        //dd($request->all());
-
-
         DB::beginTransaction();
         try {
 
             $booking = new $this->booking();
             $booking->date  = helper::mysql_date();
             $booking->customer_id  = $request->customer_id ;
-            $booking->voucher_no  = $request->voucher_no ;
+            $booking->voucher_no  = helper::generateInvoiceId("hotel_booking_prefix","bookings") ;
             $booking->payment_type  = $request->payment_type ;
             $booking->subtotal  = $request->sub_total ;
             $booking->discount  = $request->discount ;
@@ -345,9 +342,8 @@ class BookingRepositories
         try {
                 $status = $request->status;
 
-
                 $bookingInfo= Booking::find($id);
-
+              
                 $this->getAvailableRoom(null,$bookingInfo);
 
                 if(!empty($request->account_id[0])):
@@ -365,8 +361,10 @@ class BookingRepositories
                         //if payment type cash then
                         if($bookingInfo->payment_type == "Cash"):
                             $this->salesCreditPayment($bookingInfo->id);
+                         
                             //sales payment journal
-                            $this->salePaymentJournal($bookingInfo->id,$bookingInfo->advanced_amount,$accountId,$bookingInfo->date,18);
+                            $this->salePaymentJournal($general_id,$bookingInfo->advance_paid,$accountId,$bookingInfo->date,18);
+                          
                         endif;
                         $bookingInfo->booking_status =  'Approved';
                         $bookingInfo->approved_by = helper::userId();
@@ -488,6 +486,7 @@ class BookingRepositories
 
     public static function salePaymentJournal($masterLedgerId,$paidAmount,$accountId,$date,$form_id)
     {
+      
         //account receivable = credit
         $accountReceiveable = new GeneralLedger();
         $accountReceiveable->company_id = helper::companyId();

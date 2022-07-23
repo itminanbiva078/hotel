@@ -12,6 +12,8 @@ $accessRoute = array(
     'inventoryTransaction.transfer.edit',
     'inventoryTransaction.inventoryAdjustment.create',
     'inventoryTransaction.inventoryAdjustment.edit',
+    'booking.booking.create',
+    'booking.booking.edit',
   
 );
 
@@ -242,12 +244,20 @@ $mrrRoute = array(
                 </tr>
 
                 <tr class="div_payment" style="display: none!important">
+                    <td class="grand_total text-right" colspan="6">Available Balance:</td>
+                    <td><input  type="text" id="accountBalance" class="form-control accountBalance" readonly  name="accountBalance" placeholder="0.00"></td>
+                </tr>
+
+                <tr class="div_payment" style="display: none!important">
                     <td class="grand_total text-right" colspan="6">Payment:</td>
                     <td><input  type="text" id="paid_amount" class="form-control payment"  value="{{$editInfo->paid_amount ?? ''}}" name="paid_amount" placeholder="0.00"></td>
                 </tr>
+
+
+
                 <tr class="div_payment" style="display: none!important">
                     <td class="grand_total text-right" colspan="6">Present Due:</td>
-                    <td><input  type="text" id="due_amount" class="form-control payment" readonly  value="{{$editInfo->due_amount ?? ''}}" name="due_amount" placeholder="0.00"></td>
+                    <td><input  type="text" id="due_amount" class="form-control" readonly  value="{{$editInfo->due_amount ?? ''}}" name="due_amount" placeholder="0.00"></td>
                 </tr>
         
             @endif
@@ -483,11 +493,7 @@ $(document).on('change', '.product_id', function() {
             var pack_no = Number(tr.find('input.pack_no').val());
             var old_stock_value = Number(tr.find('input.old_stock_value').val());
 
-
-
-
             <?php if(in_array(Route::currentRouteName(),$mrrRoute)): ?>
-
 
                     if ($(".pack_size ")[0]) {
                         tr.find('input.approved_quantity').val(pack_size * pack_no);
@@ -495,16 +501,10 @@ $(document).on('change', '.product_id', function() {
                     } else {
                         var quantity = Number(tr.find('input.quantity').val());
                     }
-
-
-
                     var approved_quantity = Number(tr.find('input.approved_quantity').val()-0);
                     var remaining_quantity = Number(tr.find('input.actual_remaining_quantity').val()-0);
-
-                   
                     tr.find('input.remaining_quantity').val(remaining_quantity-approved_quantity);
                 
-            
                     if(approved_quantity > remaining_quantity){
                         tr.find('input.approved_quantity').val(0);
                         tr.find('input.remaining_quantity').val(remaining_quantity);
@@ -512,13 +512,9 @@ $(document).on('change', '.product_id', function() {
                         Swal.fire('Warning!', "Approved QTY can't greater than from main qty="+remaining_quantity, 'warning');  
                     }
 
-
-
-                
             <?php else: ?>
 
-
-                        if ($(".pack_size ")[0]) {
+                     if ($(".pack_size ")[0]) {
                             tr.find('input.quantity').val(pack_size * pack_no);
                             var quantity = Number(pack_size * pack_no);
                         } else {
@@ -535,9 +531,7 @@ $(document).on('change', '.product_id', function() {
                             tr.find('input.pack_no').val(0);
                             Swal.fire('Warning!', "Approved QTY can't greater than from main qty="+remaining_quantity, 'warning');  
                         }
-
-            
-           <?php endif; ?>
+         <?php endif; ?>
 
             var unit_price = Number(tr.find('input.unit_price').val());
             var total_price = Number(tr.find('input.total_price').val());
@@ -617,6 +611,14 @@ $(document).on('change', '.product_id', function() {
 
 
     }
+
+    $(document).on('keyup', '.payment', function() {
+    let paymentNow = parseFloat($(this).val()-0);
+   var grandTotal =  parseFloat($('#grand_total').val()-0);
+   var presentDue = grandTotal - paymentNow;
+   $("#due_amount").val(presentDue);
+
+});
 
     $(document).on('click', '.delete_item', function() {
         Swal.fire({
@@ -916,7 +918,6 @@ $(document).on('change', '.product_id', function() {
    var url = "<?php echo route('inventorySetup.product.single.info');?>";
    <?php endif;?>
 
-
     $.ajax({
         url: url,
         method: 'GET',
@@ -948,11 +949,13 @@ $(document).on('change', '.product_id', function() {
 
                 <?php else: ?>
                 tr.find('.unit_price').val(data.data.purchases_price);
+            
                 <?php endif;?>
                 $(".unit_price").trigger("keyup");
             }else{
                //login implement later
             }
+          
         }
     });
 });

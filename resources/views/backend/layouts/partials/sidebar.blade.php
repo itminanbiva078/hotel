@@ -23,7 +23,7 @@ $activeClass = Helper::getMenuParent(Route::currentRouteName());
                             </a>
                         </div> -->
                         <div class="profile_information">
-                            <a href="#">MASTER ERP</a>
+                            <a href="#">HOTEL MOHONA</a>
                         </div>
                     </div>
                 </div>

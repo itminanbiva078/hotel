@@ -58,7 +58,7 @@ Hotel Mohona
 <section class="who-we-content-section pad-30">
   <div class="container">
     <div class="property-search-box-here">
-      <form method="POST" action="{{ route('rooms') }}">
+      <form method="GET" action="{{ route('rooms') }}">
         @csrf
         <div class="row justify-content-center">
           <div class="col-md-3" >
@@ -68,7 +68,7 @@ Hotel Mohona
                 <option selected disabled>Select Rooms Type</option>
                 <option value="all-rooms">All Rooms</option>
                 @foreach($category as $cat_id)
-                  <option @if(!empty($room_type) && $room_type == $cat_id->id) selected @endif data-icon="fa fa-home" value="{{$cat_id->id}}">{{$cat_id->name}}</option>
+                  <option data-icon="fa fa-home" value="{{$cat_id->id}}">{{$cat_id->name}}</option>
                 @endforeach                
               </select>
             </div>

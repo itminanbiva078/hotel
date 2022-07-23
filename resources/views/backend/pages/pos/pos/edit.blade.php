@@ -1,7 +1,7 @@
 @extends('backend.layouts.master')
 
 @section('title')
-SalesSetup - {{$title}}
+POS - {{$title}}
 @endsection
 
 

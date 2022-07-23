@@ -212,7 +212,7 @@ Hotel Mohona
                     @if(!empty($roomStatus) && $roomStatus == 'show')
                        <a href="{{ route('book_now',$product->id)}}"  for="{{$product->id}}" class="btn btn-default btn-block search-now-btn"> Book Now</a>
                     @else 
-                       <a href="#"   disabled class="btn btn-default btn-block search-now-btn"> Room Not Avaialble. Search Different Date</a>
+                       <a href="#"   disabled class="btn btn-default btn-block search-now-btn"> Search Different Date</a>
                     @endif
                   </div>
                   {{-- <form  action="{{route('room_list')}}">

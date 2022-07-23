@@ -81,7 +81,6 @@ class PurchasesPaymentController extends Controller
             session()->flash('error', 'Validation error !!');
             return redirect()->back()->withErrors($e->errors())->withInput();
         }
-
         $result = $this->systemService->store($request);
         if (is_integer($result)) {
             session()->flash('success', 'Data successfully save!!');

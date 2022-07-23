@@ -3,6 +3,7 @@
 @section('title')
 ProductSetup - {{$title}}
 @endsection
+
 @section('navbar-content')
 <div class="content-header">
     <div class="container-fluid">
@@ -25,7 +26,6 @@ ProductSetup - {{$title}}
 @endsection
 
 @section('admin-content')
-
 
 <div class="row">
     <div class="col-md-12">

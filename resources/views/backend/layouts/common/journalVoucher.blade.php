@@ -201,8 +201,8 @@
                 total_credit_price += total_price;
             });
 
-            $('.sub_total_debit').text(numberFormat(total_debit_price));
-            $('.sub_total_credit').text(numberFormat(total_credit_price));
+            $('.sub_total_debit').text((total_debit_price));
+            $('.sub_total_credit').text((total_credit_price));
 
         }
 

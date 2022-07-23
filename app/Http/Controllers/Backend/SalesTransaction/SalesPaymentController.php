@@ -73,9 +73,6 @@ class SalesPaymentController extends Controller
 
     public function customerDueVoucherList(Request $request)
     {
-
-      
-
         $collectionType = $request->collection_type;
         if($collectionType == 'Pos Sale'): 
             $dueVoucherList = $this->systemService->dueVoucherList($request->customer_id,17);
@@ -104,7 +101,6 @@ class SalesPaymentController extends Controller
             session()->flash('error', 'Validation error !!');
             return redirect()->back()->withErrors($e->errors())->withInput();
         }
-
         $result = $this->systemService->store($request);
         if (is_integer($result)) {
             session()->flash('success', 'Data successfully save!!');

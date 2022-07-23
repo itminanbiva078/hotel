@@ -190,7 +190,7 @@ class PurchasesPaymnetRepositories
     public function dueVoucherList($purchasesId)
     {
         $duePaymentList = PurchasesPayment::groupBy("voucher_id")
-        ->selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as dueAmount,sum(credit) as totalPayment,sum(debit) as purchasesAmount,id,voucher_id,voucher_no,branch_id,supplier_id,debit,credit')
+        ->selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as dueAmount,sum(credit) as totalPayment,sum(debit) as purchasesAmount,id,voucher_id,voucher_no,branch_id,supplier_id,debit,credit,date')
         ->where('supplier_id',$purchasesId)
         ->havingRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) > 0')
         ->company()
@@ -208,11 +208,10 @@ class PurchasesPaymnetRepositories
                 if(!empty($request->credit[$key])): 
                     $request->paid_amount = $request->credit[$key];
                     if($request->payment_type == "Cash"): 
+                        $request->request->add(['account_id' =>7]);
                         $moneyReceitId =  $this->purchasesRepository->purchasesCreditPayment($eachVoucher,$request->paid_amount,$request->payment_type,$request->date);
-                        //purchases payment journal
+                       
                         Journal::purchasesPaymentJournal($eachVoucher,$request->credit[$key],$request->account_id,$request->date);
-
-                       // $this->purchasesRepository->paidAmountUpdate($eachVoucher,$request->credit[$key]);
                     else:  
                         $moneyReceitId = $this->purchasesRepository->purchasesBankPayment($eachVoucher,$request);
                     endif;
@@ -222,6 +221,7 @@ class PurchasesPaymnetRepositories
             // all good
             return  $moneyReceitId;
         } catch (\Exception $e) {
+            dd($e->getMessage());
             DB::rollback();
             return $e->getMessage();
         }

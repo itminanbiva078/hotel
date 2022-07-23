@@ -1,6 +1,6 @@
 @extends('backend.layouts.master')
 @section('title')
-General Ledger Report
+Stock Ledger Report
 @endsection
 
 @section('styles')

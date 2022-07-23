@@ -199,11 +199,21 @@ class InventoryAdjustmentRepositories
                 if(helper::isInventoryAdjustAuto()): 
                     //general table data save
                     $general_id = $this->generalSave($poMaster->id);
+                    if($request->adjustment_type == 'In'): 
+                        //main stock table data save
+                      //  Journal::inventoryAdjustmentJournal($general_id,$request->date);
+                        $this->stockPlus($general_id,$poMaster->id);
+                        //stock cashing table data save
+                        $this->stockSummaryPlusSave($poMaster->id);
+                    else:
+                    
+                        
                     //main stock table data save
-                    Journal::inventoryAdjustmentJournal($general_id,$request->date);
-                    $this->stockSave($general_id,$poMaster->id);
-                    //stock cashing table data save
-                    $this->stockSummarySave($poMaster->id);
+                     //  Journal::inventoryAdjustmentJournal($general_id,$request->date);
+                        $this->stockMinus($general_id,$poMaster->id);
+                        //stock cashing table data save
+                        $this->stockSummaryMinusSave($poMaster->id);
+             endif;
                     $poMaster->status  = 'Approved';
                     $poMaster->save();
                  endif;  
@@ -236,9 +246,8 @@ class InventoryAdjustmentRepositories
     }
 
 
-    public function stockSave($general_id, $adjustmentId)
+    public function stockPlus($general_id, $adjustmentId)
     {
-       
         $adjustmentInfo = InventoryAdjustmentDetails::where('inven_ad_id', $adjustmentId)->company()->get();
         $allStock = array();
         foreach ($adjustmentInfo as $key => $value) :
@@ -249,7 +258,7 @@ class InventoryAdjustmentRepositories
             $generalStock['branch_id']  = $value->branch_id ?? helper::getDefaultBranch();
             $generalStock['store_id']  = $value->store_id ?? helper::getDefaultStore();
             $generalStock['product_id']  = $value->product_id;
-            $generalStock['type']  = "out";
+            $generalStock['type']  = "adin";
             $generalStock['batch_no']  = $value->batch_no;
             $generalStock['pack_size']  = $value->pack_size;
             $generalStock['pack_no']  = $value->pack_no;
@@ -263,11 +272,60 @@ class InventoryAdjustmentRepositories
         return $stockInfo;
     }
 
-
-    
+    public function stockMinus($general_id, $adjustmentId)
+    {
+        $adjustmentInfo = InventoryAdjustmentDetails::where('inven_ad_id', $adjustmentId)->company()->get();
+        $allStock = array();
+        foreach ($adjustmentInfo as $key => $value) :
+            $generalStock = array();
+            $generalStock['date'] = helper::mysql_date($value->date);
+            $generalStock['company_id'] = helper::companyId();
+            $generalStock['general_id'] = $general_id;
+            $generalStock['branch_id']  = $value->branch_id ?? helper::getDefaultBranch();
+            $generalStock['store_id']  = $value->store_id ?? helper::getDefaultStore();
+            $generalStock['product_id']  = $value->product_id;
+            $generalStock['type']  = "adout";
+            $generalStock['batch_no']  = $value->batch_no;
+            $generalStock['pack_size']  = $value->pack_size;
+            $generalStock['pack_no']  = $value->pack_no;
+            $generalStock['quantity']  = $value->quantity;
+            $generalStock['unit_price']  = $value->unit_price;
+            $generalStock['total_price']  = $value->total_price;
+            array_push($allStock, $generalStock);
+            //update budget table
+        endforeach;
+          $stockInfo = Stock::insert($allStock);  
+        return $stockInfo;
+    }
 
  
-    public function stockSummarySave($adjustmentId)
+    public function stockSummaryPlusSave($adjustmentId)
+    {
+        $materialIssueDetails = InventoryAdjustmentDetails::where('inven_ad_id', $adjustmentId)->company()->get();
+        foreach ($materialIssueDetails as $key => $value) :
+            $stockSummaryExits =  StockSummary::where('company_id', helper::companyId())->where('product_id', $value->product_id)->first();
+            if (empty($stockSummaryExits)) {
+                $stockSummary = new StockSummary();
+                $stockSummary->quantity = $value->quantity;
+            } else {
+                $stockSummary = $stockSummaryExits;
+                $stockSummary->quantity = $stockSummary->quantity + $value->quantity;
+            }
+            $stockSummary->company_id = helper::companyId();
+            $stockSummary->branch_id = $value->branch_id ?? helper::getDefaultBranch();
+            $stockSummary->store_id = $value->store_id ?? helper::getDefaultStore();
+            $stockSummary->product_id = $value->product_id;
+            $stockSummary->category_id = helper::getRow('products','id',$value->product_id,'category_id');
+            $stockSummary->brand_id = helper::getRow('products','id',$value->product_id,'brand_id');
+            $stockSummary->batch_no = $value->batch_no;
+            $stockSummary->pack_size = $value->pack_size;
+            $stockSummary->pack_no = $value->pack_no;
+            $stockSummary->save();
+        endforeach;
+        return true;
+    }
+
+    public function stockSummaryMinusSave($adjustmentId)
     {
         $materialIssueDetails = InventoryAdjustmentDetails::where('inven_ad_id', $adjustmentId)->company()->get();
         foreach ($materialIssueDetails as $key => $value) :

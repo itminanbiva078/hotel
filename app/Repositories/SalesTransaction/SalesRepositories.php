@@ -204,9 +204,9 @@ class SalesRepositories
 
     public function store($request)
     {
-
         DB::beginTransaction();
         try {
+            
             $poMaster =  new $this->sales();
             $poMaster->date = date('Y-m-d', strtotime($request->date));
             $poMaster->payment_type  = $request->payment_type;
@@ -218,9 +218,9 @@ class SalesRepositories
             if(!empty($request->account_id)):
                 $poMaster->account_id  = $request->account_id[0];
             endif;
-            $poMaster->due_amount  = $request->grand_total;
 
-            
+
+            $poMaster->due_amount  = $request->grand_total;
             $poMaster->voucher_no  = $request->voucher_no;
             $poMaster->subtotal  = $request->sub_total;
             $poMaster->discount  = $request->discount;
@@ -244,13 +244,16 @@ class SalesRepositories
                     $this->salesDebitPayment($poMaster->id, $request->grand_total,5);
                     //general table data save
                     $general_id = $this->generalSave($poMaster->id,5);
+                  
                     //sales credit journal
                     Journal::saleCreditJournal($general_id,$costOfGoodSold);
                         //if payment type cash then
                     if($request->payment_type == "Cash"):
                         $this->salesCreditPayment($poMaster->id,$request->paid_amount,$request->payment_type,null,5);
                         //sales payment journal
-                        Journal::salePaymentJournal($poMaster->id,$request->paid_amount,$request->account_id[0],$request->date,5);
+                        // Journal::salePaymentJournal($poMaster->id,$request->paid_amount,$request->account_id[0],$request->date,5);
+                            Journal::salePaymentJournal($general_id,$request->paid_amount,$request->account_id[0],$request->date,5);
+                      
                         $poMaster->sales_status =  'Approved';
                     endif;
     
@@ -309,6 +312,7 @@ class SalesRepositories
             // all good
             return $poMaster->id;
         } catch (\Exception $e) {
+            dd($e->getMessage());
             DB::rollback();
             return $e->getMessage();
         }
@@ -627,7 +631,9 @@ class SalesRepositories
             $masterDetails['unit_price']  = $request->unit_price[$key];
             $masterDetails['total_price']  = $request->total_price[$key];
             array_push($allDetails, $masterDetails);
-            $costOfGoods+=helper::productAvg($masterDetails['product_id'],$masterDetails['batch_no']);
+            $singleProductAvgPrice =helper::productAvg($masterDetails['product_id'],$masterDetails['batch_no']);
+            $costOfGoods+=$singleProductAvgPrice*$request->quantity[$key];
+
         endforeach;
            salesDetails::insert($allDetails);
         return $costOfGoods;
@@ -697,12 +703,14 @@ class SalesRepositories
         $salesDetails = SalesDetails::where('sales_id', $sale_id)->company()->get();
         $costOfGoods=0;
         foreach ($salesDetails as $key => $value) :
-            $costOfGoods+=helper::productAvg($value->product_id,$value->batch_no);
+            $singleProductAvgPrice = helper::productAvg($value->product_id,$value->batch_no);
+            $costOfGoods+=$singleProductAvgPrice*$value->quantity;
         endforeach;
         return $costOfGoods;
+
     }
 
- 
+
     public function stockSummarySave($sales_id,$form_id = null)
     {
         if($form_id == 17): 

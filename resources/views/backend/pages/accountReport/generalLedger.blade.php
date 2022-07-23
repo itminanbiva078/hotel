@@ -120,14 +120,14 @@ table#show_item tr td {
                                         @endphp
                                         <tr>
                                             <td>{{$key+1}}</td>
-                                            <td>{{helper::get_php_date($eachResult->date)}}</td>
-                                            <td>@php echo helper::getVoucher($eachResult->general)@endphp</td>
+                                            <td>{{helper::get_php_date($eachResult->date ?? '')}}</td>
+                                            <td>@php echo helper::getVoucher($eachResult->general ?? '')@endphp</td>
                                             <td>{{$eachResult->general->formType->name ?? ''}}</td>
-                                            <td>@php echo helper::getVoucherBy($eachResult->general); @endphp</td>
-                                            <td>{{$eachResult->memo}}</td>
-                                            <td class="text-right">{{helper::pricePrint($eachResult->debit)}}</td>
-                                            <td class="text-right">{{helper::pricePrint($eachResult->credit)}}</td>
-                                            <td class="text-right">{{helper::pricePrint($balance+$opening)}}</td>
+                                            <td>@php echo helper::getVoucherBy($eachResult->general ?? ''); @endphp</td>
+                                            <td>{{$eachResult->memo ?? ''}}</td>
+                                            <td class="text-right">{{helper::pricePrint($eachResult->debit ?? '')}}</td>
+                                            <td class="text-right">{{helper::pricePrint($eachResult->credit ?? '')}}</td>
+                                            <td class="text-right">{{helper::pricePrint($balance+$opening ?? '')}}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

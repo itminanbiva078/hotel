@@ -80,15 +80,10 @@ SalesTransaction - {{$title}}
                         <tr>
                             <th>SL</th>
                             <th>Product</th>
-                            @if(in_array('batch_no',$activeColumn))
+                            {{-- @if(in_array('batch_no',$activeColumn))
                             <th class="text-right">Batch No</th>
-                            @endif
-                            @if(in_array('pack_size',$activeColumn))
-                            <th class="text-right">Pack Size	</th>
-                            @endif
-                            @if(in_array('pack_no',$activeColumn))
-                            <th class="text-right">Pack No.	</th>
-                            @endif
+                            @endif --}}
+                          
                             <th class="text-right">Quantity</th>
                             <th class="text-right">Unit Price</th>
                             <th class="text-right">Total Price</th>
@@ -108,15 +103,10 @@ SalesTransaction - {{$title}}
                             <tr>
                                 <td>{{$key+1}}</td>
                                 <td>{{$eachDetails->product->name ?? ''}}</td>
-                                @if(in_array('batch_no',$activeColumn))
+                                {{-- @if(in_array('batch_no',$activeColumn))
                                 <td  class="text-right">{{$eachDetails->batch->name ?? ''}}</td>
-                                @endif
-                                @if(in_array('pack_size',$activeColumn))
-                                <td  class="text-right">{{$eachDetails->pack_size ?? ''}}</td>
-                                @endif
-                                @if(in_array('pack_no',$activeColumn))
-                                <td  class="text-right">{{$eachDetails->pack_no ?? ''}}</td>
-                                @endif
+                                @endif --}}
+                              
                                 <td class="text-right">{{$eachDetails->quantity ?? ''}}</td>
                                 <td class="text-right">{{helper::pricePrint($eachDetails->unit_price)}}</td>
                                 <td class="text-right">{{helper::pricePrint($eachDetails->total_price)}}</td>
@@ -125,7 +115,7 @@ SalesTransaction - {{$title}}
                     </tbody>
                     <tfoot>
                       <tr>
-                        <th colspan="{{helper::getColspan($activeColumn)}}" class="text-right">Sub-Total</th>
+                        <th colspan="2" class="text-right">Sub-Total</th>
                         <th class="text-right">{{$tqty}}</th>
                         <th class="text-right">0.00</th>
                         <th class="text-right">{{helper::pricePrint($tprice)}}</th>

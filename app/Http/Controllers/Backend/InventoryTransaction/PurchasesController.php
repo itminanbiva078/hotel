@@ -246,7 +246,6 @@ class PurchasesController extends Controller
         }
     }
    
-
     /**
      * @param $slug
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View

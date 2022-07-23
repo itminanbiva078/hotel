@@ -89,22 +89,51 @@ class FrontendController extends Controller
     // Room List
     public function rooms(Request $request)
     {
+        // if(!empty($request->room_type)): 
+        //     $room_type = $request->room_type;
+        //     if($request->room_type == 'all-rooms'){
+        //         $product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->get();
+        //     }else{
+        //         $product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->where('category_id',$request->room_type)->get();
+        //     }
+        // else: 
+        //     $product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->get();
+        // endif;
+        // $prod_category = array();
+        // foreach ($product as $key => $value) {
+        //     array_push($prod_category, $value->category_id);
+        // }
+        // $category = Category::whereIn('id',$prod_category)->get();
+        // $flag = 0;
+        // return view('web.pages.property', get_defined_vars());
+
+
         if(!empty($request->room_type)): 
             $room_type = $request->room_type;
-            if($request->room_type == 'all-rooms'){
+            if($room_type == 'all-rooms'){
                 $product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->get();
+                $prod_category = array();
+                foreach ($product as $key => $value) {
+                    array_push($prod_category, $value->category_id);
+                }
+                $category = Category::whereIn('id',$prod_category)->get();
             }else{
                 $product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->where('category_id',$request->room_type)->get();
+                $product1 = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->get();
+                $prod_category = array();
+                foreach ($product1 as $key => $value) {
+                    array_push($prod_category, $value->category_id);
+                }
+                $category = Category::whereIn('id',$prod_category)->get();
             }
         else: 
             $product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->get();
+            $prod_category = array();
+            foreach ($product as $key => $value) {
+                array_push($prod_category, $value->category_id);
+            }
+            $category = Category::whereIn('id',$prod_category)->get();
         endif;
-        $prod_category = array();
-        foreach ($product as $key => $value) {
-            array_push($prod_category, $value->category_id);
-        }
-        $category = Category::whereIn('id',$prod_category)->get();
-        $flag = 0;
         return view('web.pages.property', get_defined_vars());
     }
     // Search Product
@@ -341,36 +370,24 @@ class FrontendController extends Controller
         return view('web.pages.contact');
     }
 
-
-   
-
-
-
     // Product Details
     public function property_details(Request $request, $id)
     {
-
         if(!empty($request->daterange)): 
-
-           
             $dateran = $request->daterange;
             $daterange = explode("-",$request->daterange);
             $from_date = date('Y-m-d',strtotime($daterange[0]));
             $to_date = date('Y-m-d',strtotime($daterange[1]));
             if($from_date == $to_date){
                 $to_date = date('Y-m-d', strtotime( $daterange[1]. " +1 days"));
-
                 $dateran = date('m/d/Y',strtotime($from_date)) .' - '.date('m/d/Y',strtotime($to_date));
-          
             }
-            $roomStatus = $this->getFreeRoom($from_date,$to_date,1,null,$id);
-           
+            $roomStatus = $this->getFreeRoom($from_date,$to_date,1,null,$id);      
             Session::put('entry_date', $from_date);
             Session::put('exit_date', $to_date);
 
         else: 
            
-
             $entry_date = Session::get('entry_date');
             $exit_date = Session::get('exit_date');
 
@@ -383,16 +400,18 @@ class FrontendController extends Controller
             endif;
            
            // echo $dateran;die;
-            $roomStatus = $this->getFreeRoom($entry_date,$exit_date,1,null,$id);
-        
-      
+           // $roomStatus = $this->getFreeRoom($entry_date,$exit_date,1,null,$id);
+           $roomStatus='hide';
         endif;
+       // dd($roomStatus);
+
         $detailsId = $id;
         $product = Product::with('productDetails','productImages','reviews')->where('id', $id)->first();
         $product_attributes = $product->productDetails->product_attributes;
         $similar_product = Product::with('productDetails','productImages')->where('type_id', 'Rooms')->where('category_id', $product->category_id)->where('id', '!=', $id)->limit(4)->get();
         return view('web.pages.property_details', get_defined_vars());
     }
+
     // Get Free Room
     public function getFreeRoom($from_date,$to_date, $numer_of_person=NULL,$reportType=null,$singleRoom=null){
         $from_date = date('Y-m-d',strtotime($from_date));
@@ -428,7 +447,6 @@ class FrontendController extends Controller
         foreach($result as $key => $value): 
             array_push($allRoomId,$value->id);
   
-
         endforeach;
 
         if(!empty($reportType) && $reportType == 1): 
@@ -447,21 +465,19 @@ class FrontendController extends Controller
             $result = Product::with('productDetails','productImages')->whereIn('id', $allRoomId)->get();
             return $result;
         endif;
-
-
-        
+ 
     }
+    
     // Search Available Room
     public function room_list(Request $request)
     {
-
         if($request->has('daterange')){
             $daterange = explode(" - ", $request->daterange);
             $entry_date = date('Y-m-d', strtotime($daterange[0]));
             $exit_date = date('Y-m-d', strtotime($daterange[1]));
 
             if($entry_date == $exit_date){
-                $exit_date = date('Y-m-d', strtotime( $daterange[1]. " +1 days"));
+                $exit_date = date('Y-m-d', strtotime( $daterange[1]. " +2 days"));
           
             }
 
@@ -660,7 +676,7 @@ class FrontendController extends Controller
     public function book_now($id)
     {
         $user = Auth::user();
-        $adult = Session::get('adult') ? : 0;
+        $adult = Session::get('adult') ? : 1;
         $child = Session::get('children') ? : 0;
         $entry_date = Session::get('entry_date');
         $entry_date = date_create($entry_date);
@@ -669,15 +685,11 @@ class FrontendController extends Controller
         $exit_date = date_create($exit_date);
         $exit_date = date_format($exit_date,"m/d/Y");
         $date_range = $entry_date.' - '.$exit_date;
-
         $date1=date_create($entry_date);
         $date2=date_create($exit_date);
         $diff=date_diff($date1,$date2)->days;
-
-        
         $datediff =  strtotime($entry_date) - strtotime($exit_date);
         $total_date_difference = (int)round($datediff / (60 * 60 * 24));
-       
         $total_days = $diff;//$total_date_difference + 1;
         $product_id = $id;
         if(Session::has('room_id')){

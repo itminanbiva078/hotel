@@ -9,6 +9,8 @@ use App\Services\AccountSetup\ChartOfAccountService;
 use App\Transformers\ChartOfAccountTransformer;
 use Illuminate\Validation\ValidationException;
 use helper;
+use App\Helpers\Journal;
+use App\Models\Bank;
 
 class ChartOfAccountController extends Controller
 {
@@ -163,6 +165,21 @@ class ChartOfAccountController extends Controller
         }
     }
 
+    public function getAccountBalance(Request $request){
+
+      $accountId = $request->account_id;
+      $acccountBalance =   Journal::accountBalance($accountId);
+      return $acccountBalance ?? 0;
+    }
+
+
+    public function getAccountBankBalance(Request $request){
+     
+        $bank_id = $request->bank_id_;
+        $bankIfno= Bank::find($bank_id);
+        $acccountBalance =   Journal::accountBalance($bankIfno->account_id);
+      return $acccountBalance ?? 0;
+    }
 
     /**
      * @param $slug

@@ -209,9 +209,6 @@ class SalesReportRepositories
 
     public function getCustomerPendingChequePayment($customerId,$from_date,$to_date){
 
-      
-
-
         if($customerId == "All" &&  $to_date == "Opening"):
          
             $reports = SalePendingCheque::selectRaw('sum(IFNULL(payment,0)) as opening,receive_date,customer_id')->where('customer_id',$customerId)->where('receive_date', "<",$from_date)->where('status','Pending')->company()->first();

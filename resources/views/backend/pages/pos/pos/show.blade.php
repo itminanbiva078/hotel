@@ -44,14 +44,14 @@
                 <div class="no-print"></div>
                 <div id="receipt-data">
                     <div class="text-center">
-                        <h3 style="text-transform:uppercase;">PARTY TIME</h3>
-                        <p>Shop No: 1B-010A, Jamuna Future Park, Dhaka Bangladesh</p>                
-                        <p>Tel : 01712026972</p>                
+                        <h3 style="text-transform:uppercase;">POS INVOICE</h3>
+                        <p>Hotel Mohona</p>                
+                        <p>Tel : 01787-656560</p>                
                     </div>
                    
                     <p>
-                       <span class="text-left">Date:2022-02-02</span>
-                       <span class="text-right" style="text-align: right">Sales Person: Customer 1 </span>
+                       <span class="text-left">{{ $details->date ?? ''}}</span><br>
+                       <span class="text-right" style="text-align: right">Sales Person: {{ $details->customer->name ?? ''}} </span>
                     
                     </p>
                    

@@ -84,54 +84,30 @@ InventoryTransaction - {{$title}}
                         <tr>
                             <th>SL</th>
                             <th>Product</th>
-                            @if(in_array('batch_no',$activeColumn))
-                            <th>Batch No</th>
-                            @endif
-                            @if(in_array('pack_size',$activeColumn))
-                            <th class="text-right">Pack Size	</th>
-                            @endif
-                            @if(in_array('pack_no',$activeColumn))
-                            <th class="text-right">Pack No.	</th>
-                            @endif
-                            @if(helper::mrrIsActive())
-                            <th class="text-right">Mrr Received Quantity</th>
-                            @endif
+                          
                             <th class="text-right">Purchases Quantity</th>
+                           
                             <th class="text-right">Unit Price</th>
                             <th class="text-right">Total Price</th>
                         </tr>
                     </thead>
                     <tbody>
                         @php 
-
-                     
-
-                          $mtqty = 0;
                           $tqty = 0;
                           $tprice = 0;
                         @endphp 
                         @foreach($details->purchasesDetails as $key => $eachDetails)
                         @php 
-                            $mtqty+=$eachDetails->approved_quantity;
+                          
                             $tqty+=$eachDetails->quantity;
                             $tprice+=$eachDetails->quantity*$eachDetails->unit_price;
                           @endphp
                             <tr>
                                 <td>{{$key+1}}</td>
                                 <td>{{$eachDetails->product->name ?? ''}}</td>
-                                @if(in_array('batch_no',$activeColumn))
-                                <td>{{$eachDetails->batch_no ?? ''}}</td>
-                                @endif
-                                @if(in_array('pack_size',$activeColumn))
-                                <td class="text-right">{{$eachDetails->pack_size ?? ''}}</td>
-                                @endif
-                                @if(in_array('pack_no',$activeColumn))
-                                <td class="text-right">{{$eachDetails->pack_no ?? ''}}</td>
-                                @endif
-                                @if(helper::mrrIsActive())
-                                <td class="text-right">{{$eachDetails->approved_quantity ?? 0}}</td>
-                                @endif
+                               
                                 <td class="text-right">{{$eachDetails->quantity ?? ''}}</td>
+                               
                                 <td class="text-right">{{helper::pricePrint($eachDetails->unit_price,2)}}</td>
                                 <td class="text-right">{{helper::pricePrint($eachDetails->total_price,2)}}</td>
                             </tr>
@@ -139,12 +115,11 @@ InventoryTransaction - {{$title}}
                     </tbody>
                     <tfoot>
                       <tr>
-                        <th colspan="{{helper::getColspan($activeColumn)}}" class="text-right">Sub-Total</th>
-                        @if(helper::mrrIsActive())
-                        <th class="text-right">{{$mtqty}}</th>
-                        @endif
+                        <th colspan="2" class="text-right">Sub-Total</th>
+                       
                         <th class="text-right">{{$tqty}}</th>
-                        <th class="text-right">0.0</th>
+                        <th class="text-right">0</th>
+                     
                         <th class="text-right">{{helper::pricePrint($tprice)}}</th>
                     </tr>
                     </tfoot>

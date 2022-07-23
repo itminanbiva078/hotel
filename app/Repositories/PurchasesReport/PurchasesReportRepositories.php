@@ -39,15 +39,17 @@ class PurchasesReportRepositories
         if($supplierId == "All" && $to_date == "Opening"):
           $reports =  PurchasesPayment::selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as opening')->where('date', "<",$from_date)->company()->where('supplier_id',$supplierId)->first();
         elseif($supplierId != "All" && $to_date == "Opening"): 
-            $reports =  PurchasesPayment::selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as opening')->where('supplier_id',$supplierId)->where('date', "<",$from_date)->company()->first();
+          
+
+            $reports = PurchasesPayment::selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as opening')->where('supplier_id',$supplierId)->where('date', "<",$from_date)->company()->first();
+
+
         elseif($supplierId== "All" && $to_date != "Opening"): 
-            
 
             $reports = Supplier::with(['ppayment' => function($query) use($from_date,$to_date){
                 $query->selectRaw('sum(debit) as debit,sum(credit) as credit,supplier_id,date,id,payment_type')
                 ->whereBetween('date', [$from_date, $to_date])->company()->groupBy("supplier_id");
             }])->groupBy('id')->get();
-            
             $reports->map(function ($d) use($from_date,$to_date) {
                 $opening = $this->getSupplierLedger($d->id,$from_date,"Opening");
                 $d['opening']=$opening->opening;
@@ -60,17 +62,8 @@ class PurchasesReportRepositories
                 
                return $d;
             });
-
-
-
-      
-
         else: 
            $reports = PurchasesPayment::with("supplier","branch")->where('supplier_id',$supplierId)->whereBetween('date', [$from_date, $to_date])->company()->get();
-
-       
-         
-
         endif;
         return $reports;
     }
@@ -86,6 +79,8 @@ class PurchasesReportRepositories
         elseif($supplierId != "All" && $to_date == "Opening"): 
             $reports = PurchasesPayment::selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as opening')->where('supplier_id',$supplierId)->where('credit', ">",0)->where('date', "<",$from_date)->company()->first();
         elseif($supplierId== "All" && $to_date != "Opening"):
+
+
             $reports = Supplier::with(['ppayment' => function($query) use($from_date,$to_date){
                 $query->selectRaw('sum(debit) as debit,sum(credit) as credit,supplier_id,date,id,payment_type')
                 ->whereBetween('date', [$from_date, $to_date])->company()
@@ -196,14 +191,17 @@ class PurchasesReportRepositories
           $reports =  Purchases::selectRaw('sum(IFNULL(subtotal,0)) as subtotal,sum(IFNULL(discount,0)) as discount,sum(grand_total) as grand_total')->with("supplier","branch")->where('date', "<",$from_date)->company()->groupBy("supplier_id")->first();
         elseif($supplierId != "All" && $to_date == "Opening"): 
          $reports =  Purchases::selectRaw('sum(IFNULL(subtotal,0)) as subtotal,sum(IFNULL(discount,0)) as discount,sum(grand_total) as grand_total')->with("supplier","branch")->where('date', "<",$from_date)->company()->where("supplier_id",$supplierId)->first();
+
+        
+
+
         elseif($supplierId== "All" && $to_date != "Opening"):
 
-        $reports = Purchases::selectRaw('sum(subtotal) as subtotal,sum(discount) as discount,sum(grand_total) as grand_total,supplier_id,id,branch_id')
-
+           $reports = Purchases::selectRaw('sum(subtotal) as subtotal,sum(discount) as discount,sum(grand_total) as grand_total,supplier_id,id,branch_id')
             ->with("supplier","branch")->whereBetween('date', [$from_date, $to_date])->company()->groupBy("supplier_id")->get();
          foreach($reports as $key => $report): 
                 $opening = $this->getSupplierPurchasesVoucher($report->supplier_id,$from_date,"Opening");
-                $report->opening = $opening->opening;
+                $report->opening = $opening->grand_total;
             endforeach;
         else: 
          $reports =  Purchases::with("supplier","branch")->where('supplier_id',$supplierId)->whereBetween('date', [$from_date, $to_date])->company()->get();
@@ -268,7 +266,7 @@ class PurchasesReportRepositories
             ->where('supplier_id',$supplierId)
             ->where('date', "<",$from_date)
             ->company()
-            ->get();
+            ->first();
         elseif($supplierId== "All" && $to_date != "Opening"):
             $reports = PurchasesPayment::selectRaw('sum(IFNULL(debit,0)-IFNULL(credit,0)) as dueAmount,sum(credit) as totalPayment,sum(debit) as purchasesAmount,id,voucher_id,voucher_no,branch_id,supplier_id,debit,credit')
             ->with("supplier")
@@ -278,6 +276,14 @@ class PurchasesReportRepositories
             ->groupBy("supplier_id")
             ->company()
             ->get();
+
+            // foreach($reports as $key => $report): 
+            //     $opening = $this->getSupplierDuePurchasesVoucher($report->supplier_id,$from_date,"Opening");
+            //     $report->opening = $opening->dueAmount;
+            // endforeach;
+
+
+
         else: 
             $reports = PurchasesPayment::groupBy("voucher_id")
             ->with("supplier")

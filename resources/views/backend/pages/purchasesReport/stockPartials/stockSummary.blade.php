@@ -27,10 +27,10 @@
             </tr>
         @endforeach
     </tbody>
-    <tfoot>
+    {{-- <tfoot>
         <tr>
             <td colspan="5" class="text-right">Grand-Total: </td>
             <td class="text-right color1">{{helper::pricePrint($tbalance)}}</td>
         </tr>
-    </tfoot>
+    </tfoot> --}}
 </table>
